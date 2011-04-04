@@ -1,0 +1,6 @@
+\f. 
+    \x.
+        let id = \y.y 
+        in 
+            (id f) (id x) 
+        ni
