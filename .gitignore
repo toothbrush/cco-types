@@ -1,2 +1,4 @@
 dist
 src/CCO/HM2SystemF/AG.hs
+src/CCO/HM/AG.hs
+src/CCO/SystemF/AG.hs
