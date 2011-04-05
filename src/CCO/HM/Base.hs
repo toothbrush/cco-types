@@ -51,4 +51,11 @@ instance Eq HMTm_ where
     (==) _       _       = undefined
 
 instance Substitutable Ty where
-    applySubst s t = t
+    applySubst Identity    t = t
+    applySubst (Dot s1 s2) t = applySubst s1 (applySubst s2 t)
+    applySubst (Sub a  t0) (Alpha t)     = if a == t
+                                           then t0
+                                           else Alpha t
+    applySubst s@(Sub a  t0) (Arrow t1 t2) = Arrow
+                                              (applySubst s t1)
+                                              (applySubst s t2)
