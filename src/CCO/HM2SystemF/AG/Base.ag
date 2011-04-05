@@ -34,17 +34,17 @@ import CCO.SystemF.Base
 --  | Let  x :: {Var}  t1 :: Tm  t2 :: Tm
 
 attr HMTm HMTm_
-    syn algoW           :: {SFTm}
+    syn algoW           :: {(SFTm,Ty,TySubst)}
     inh typeEnvironment :: {TyEnv}
  
 sem HMTm
     | HMTm lhs.algoW = @t.algoW
 
 sem HMTm_
-    | Var lhs.algoW = SFVar "s"
-    | Lam lhs.algoW = SFVar "s"
-    | App lhs.algoW = SFVar "s"
-    | Let lhs.algoW = SFVar "s"
+    | Var lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
+    | Lam lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
+    | App lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
+    | Let lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
 
 
 
@@ -54,4 +54,7 @@ gen env tau = undefined
 
 inst :: TyScheme -> Ty
 inst = undefined
+
+unify :: Ty -> Ty -> TySubst
+unify t1 t2 = undefined
 }

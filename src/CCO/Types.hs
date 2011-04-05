@@ -1,4 +1,4 @@
-module CCO.Types (TyVar,Var,TyEnv,TyScheme,Ty,TySubst) where
+module CCO.Types (TyVar,Var,TyEnv,TyScheme (..),Ty (..),TySubst (..)) where
 
     type TyVar    = String
     type Var      = String

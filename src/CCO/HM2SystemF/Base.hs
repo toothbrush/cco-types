@@ -15,9 +15,16 @@
 module CCO.HM2SystemF.Base (runAlgoW) where
 
 import CCO.HM2SystemF.AG (algoW_Syn_HMTm, wrap_HMTm, sem_HMTm, Inh_HMTm (..))
+import CCO.Types
+import CCO.HM.Base (HMTm (..))
+import CCO.SystemF.Base (SFTm (..))
 
 -- instance Printable Tm where
-runAlgoW t = algoW_Syn_HMTm (wrap_HMTm (sem_HMTm t) inh_HMTm)
+runAlgoW :: HMTm -> SFTm
+------- TODO WARNING
+-- DO Something more here, this isn't the last step!
+runAlgoW t = let (sf,ty,tysbst) = algoW_Syn_HMTm (wrap_HMTm (sem_HMTm t) inh_HMTm)
+             in sf
 -- 
 -- -- | The top-level inherited attributes to be passed to an attribute grammar
 -- -- for System F.
