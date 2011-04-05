@@ -14,7 +14,7 @@ module CCO.Types (
 
     type TyEnv    = [(Var,TyScheme)]
 
-    data TyScheme = Ty
+    data TyScheme = Ty Ty
                   | Forall TyVar TyScheme
 
     data Ty       = Alpha TyVar

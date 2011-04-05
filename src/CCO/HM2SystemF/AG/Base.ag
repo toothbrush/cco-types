@@ -51,23 +51,25 @@ sem HMTm_
     | Var lhs.algoW = if elem @x (map fst @lhs.typeEnvironment)
                         then (SFVar @x, inst (getVar @x @lhs.typeEnvironment), Identity)
                         else error ("Variable "++ @x ++" not found in environment.")
-    | Lam lhs.algoW = let alpha1 = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
-                          (sft1, tau2, theta1) = @t1.algoW
+    | Lam lhs.algoW = let (sft1, tau2, theta1) = @t1.algoW
                       in  (sft1
-                          , Arrow (applySubst theta1 alpha1) (tau2)
+                          , Arrow (applySubst theta1 @loc.freshVariable) (tau2)
                           , theta1
                           )
-
+          loc.freshVariable = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
     | App lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
     | Let lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
 
+sem HMTm_
+    | Lam t1.typeEnvironment = (@x,Ty @loc.freshVariable) : @lhs.typeEnvironment 
 
 
 {
 getVar :: Var -> TyEnv -> TyScheme
 getVar x env = case lookup x env of
                 Just scheme -> scheme
-                _           -> error ("This shouldn't happen. "++x++" wasn't found in the environment.")
+                _           -> error ("This shouldn't happen. "
+                                ++x++" wasn't found in the environment.")
 
 gen :: TyEnv -> Ty -> TyScheme
 gen env tau = undefined
