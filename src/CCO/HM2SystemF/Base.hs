@@ -22,4 +22,4 @@ runAlgoW t = algoW_Syn_HMTm (wrap_HMTm (sem_HMTm t) inh_HMTm)
 -- -- | The top-level inherited attributes to be passed to an attribute grammar
 -- -- for System F.
 inh_HMTm :: Inh_HMTm
-inh_HMTm = Inh_HMTm --{prec_Inh_Tm = 0}
+inh_HMTm = Inh_HMTm {typeEnvironment_Inh_HMTm = []}
