@@ -16,8 +16,8 @@ module CCO.SystemF (
     -- * Syntax
     TyVar                               -- = String
   , Var                                 -- = String
-  , Ty (TyVar, Arr, Forall)             -- instances: Tree
-  , Tm (Var, Lam, App, TyLam, TyApp)    -- instances: Tree
+  , SFTy (SFTyVar, SFArr, SFForall)             -- instances: Tree
+  , SFTm (SFVar, SFLam, SFApp, SFTyLam, SFTyApp)    -- instances: Tree
 ) where
 
-import CCO.SystemF.Base    (TyVar, Var, Ty (..), Tm (..))
+import CCO.SystemF.Base    (TyVar, Var, SFTy (..), SFTm (..))

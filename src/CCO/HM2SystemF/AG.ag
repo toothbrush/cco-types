@@ -14,4 +14,6 @@
 
 module {CCO.HM2SystemF.AG} {} {}
 
+include "../HM/AG/Base.ag"
+include "../SystemF/AG/Base.ag"
 include "AG/Base.ag"

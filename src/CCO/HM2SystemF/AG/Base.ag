@@ -1,17 +1,16 @@
 imports
 {
 import CCO.SourcePos
+import CCO.HM.Base
+import CCO.SystemF.Base
 }
 
 -------------------------------------------------------------------------------
 -- Syntax
 -------------------------------------------------------------------------------
 
-{
---type TyVar = String    -- ^ Type of type variables. 
---type Var   = String    -- ^ Type of variables.
-}
 
+--SystemF:
 --data Ty
 --  | TyVar   a :: {TyVar}
 --  | Arr     ty1 :: Ty  ty2 :: Ty
@@ -23,3 +22,25 @@ import CCO.SourcePos
 --  | App    t1 :: Tm  t2 :: Tm
 --  | TyLam  a :: {TyVar}  t1 :: Tm
 --  | TyApp  t1 :: Tm  ty :: Ty
+--
+--HM:
+--data Tm
+--  | Tm  pos :: {SourcePos}  t :: Tm_
+--
+--data Tm_
+--  | Var  x :: {Var}
+--  | Lam  x :: {Var}  t1 :: Tm
+--  | App  t1 :: Tm  t2 :: Tm
+--  | Let  x :: {Var}  t1 :: Tm  t2 :: Tm
+
+attr HMTm HMTm_
+    syn algoW :: {SFTm}
+ 
+sem HMTm
+    | HMTm lhs.algoW = SFVar "s"
+
+sem HMTm_
+    | Var lhs.algoW = SFVar "s"
+    | Lam lhs.algoW = SFVar "s"
+    | App lhs.algoW = SFVar "s"
+    | Let lhs.algoW = SFVar "s"
