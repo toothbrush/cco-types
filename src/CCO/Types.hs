@@ -1,4 +1,4 @@
-module CCO.Types (TyVar,Var,TyEnv,TyScheme (..),Ty (..),TySubst (..)) where
+module CCO.Types (TyVar,Var,TyEnv,TyScheme (..),Ty (..),TySubst (..),applySubst,Substitutable) where
 
     type TyVar    = String
     type Var      = String
@@ -14,4 +14,7 @@ module CCO.Types (TyVar,Var,TyEnv,TyScheme (..),Ty (..),TySubst (..)) where
     data TySubst  = Identity
                   | Sub TyVar Ty
                   | Dot TySubst TySubst
+
+    class Substitutable a where
+        applySubst :: TySubst -> a -> a
 

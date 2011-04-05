@@ -49,3 +49,6 @@ instance Tree HMTm_ where
 instance Eq HMTm_ where
     (==) (Var x) (Var y) = x == y
     (==) _       _       = undefined
+
+instance Substitutable Ty where
+    applySubst s t = t

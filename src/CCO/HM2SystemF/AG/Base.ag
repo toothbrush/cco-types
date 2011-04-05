@@ -54,7 +54,7 @@ sem HMTm_
     | Lam lhs.algoW = let alpha1 = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
                           (sft1, tau2, theta1) = @t1.algoW
                       in  (sft1
-                          , Arrow (applySchemeTy theta1 alpha1) (tau2)
+                          , Arrow (applySubst theta1 alpha1) (tau2)
                           , theta1
                           )
 
@@ -68,16 +68,6 @@ getVar :: Var -> TyEnv -> TyScheme
 getVar x env = case lookup x env of
                 Just scheme -> scheme
                 _           -> error ("This shouldn't happen. "++x++" wasn't found in the environment.")
-
-applySchemeTy :: TySubst -> Ty-> Ty
-applySchemeTy Identity t = t
-
-applyScheme :: TySubst -> TyScheme -> TyScheme
-applyScheme Identity sch = sch
-applyScheme _        _   = undefined
-
-applyEnvironment :: TySubst -> TyEnv -> TyEnv
-applyEnvironment = undefined
 
 gen :: TyEnv -> Ty -> TyScheme
 gen env tau = undefined
