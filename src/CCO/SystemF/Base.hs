@@ -16,13 +16,14 @@ module CCO.SystemF.Base (
     -- * Syntax
     TyVar                               -- = String
   , Var                                 -- = String
-  , Ty (TyVar, Arr, Forall)             -- instances: Tree
-  , Tm (Var, Lam, App, TyLam, TyApp)    -- instances: Tree, Printable
+  , SFTy (SFTyVar, SFArr, SFForall)             -- instances: Tree
+  , SFTm (SFVar, SFLam, SFApp, SFTyLam, SFTyApp)    -- instances: Tree, Printable
 ) where
 
 import CCO.SystemF.AG
 import CCO.Printing               (Printable (pp))
 import CCO.Tree                   (Tree (fromTree, toTree))
+import CCO.Types
 import qualified CCO.Tree as T    (ATerm (App))
 import CCO.Tree.Parser            (parseTree, app, arg)
 import Control.Applicative        (Applicative ((<*>)), (<$>))
@@ -31,36 +32,36 @@ import Control.Applicative        (Applicative ((<*>)), (<$>))
 -- Tree instances
 -------------------------------------------------------------------------------
 
-instance Tree Ty where
-  fromTree (TyVar a)      = T.App "TyVar" [fromTree a]
-  fromTree (Arr ty1 ty2)  = T.App "Arr" [fromTree ty1, fromTree ty2]
-  fromTree (Forall a ty1) = T.App "Forall" [fromTree a, fromTree ty1]
+instance Tree SFTy where
+  fromTree (SFTyVar a)      = T.App "SFTyVar" [fromTree a]
+  fromTree (SFArr ty1 ty2)  = T.App "SFArr" [fromTree ty1, fromTree ty2]
+  fromTree (SFForall a ty1) = T.App "SFForall" [fromTree a, fromTree ty1]
 
-  toTree = parseTree [ app "TyVar"  (TyVar  <$> arg        )
-                     , app "Arr"    (Arr    <$> arg <*> arg)
-                     , app "Forall" (Forall <$> arg <*> arg)
+  toTree = parseTree [ app "SFTyVar"  (SFTyVar  <$> arg        )
+                     , app "SFArr"    (SFArr    <$> arg <*> arg)
+                     , app "SFForall" (SFForall <$> arg <*> arg)
                      ]
 
-instance Tree Tm where
-  fromTree (Var x)       = T.App "Var"   [fromTree x]
-  fromTree (Lam x ty t1) = T.App "Lam"   [fromTree x, fromTree ty, fromTree t1]
-  fromTree (App t1 t2)   = T.App "App"   [fromTree t1, fromTree t2]
-  fromTree (TyLam a t1)  = T.App "TyLam" [fromTree a, fromTree t1]
-  fromTree (TyApp t1 ty) = T.App "TyApp" [fromTree t1, fromTree ty]
+instance Tree SFTm where
+  fromTree (SFVar x)       = T.App "SFVar"   [fromTree x]
+  fromTree (SFLam x ty t1) = T.App "SFLam"   [fromTree x, fromTree ty, fromTree t1]
+  fromTree (SFApp t1 t2)   = T.App "SFApp"   [fromTree t1, fromTree t2]
+  fromTree (SFTyLam a t1)  = T.App "SFTyLam" [fromTree a, fromTree t1]
+  fromTree (SFTyApp t1 ty) = T.App "SFTyApp" [fromTree t1, fromTree ty]
 
-  toTree = parseTree [ app "Var"   (Var <$> arg                )
-                     , app "Lam"   (Lam <$> arg <*> arg <*> arg)
-                     , app "App"   (App <$> arg <*> arg        )
-                     , app "TyLam" (TyLam <$> arg <*> arg      )
-                     , app "TyApp" (TyApp <$> arg <*> arg      )
+  toTree = parseTree [ app "SFVar"   (SFVar <$> arg                )
+                     , app "SFLam"   (SFLam <$> arg <*> arg <*> arg)
+                     , app "SFApp"   (SFApp <$> arg <*> arg        )
+                     , app "SFTyLam" (SFTyLam <$> arg <*> arg      )
+                     , app "SFTyApp" (SFTyApp <$> arg <*> arg      )
                      ]
 
 -------------------------------------------------------------------------------
 -- Pretty printing
 -------------------------------------------------------------------------------
 
-instance Printable Tm where
-  pp t = ppML_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+instance Printable SFTm where
+  pp t = ppML_Syn_SFTm (wrap_SFTm (sem_SFTm t) inh_SFTm)
 
 -------------------------------------------------------------------------------
 -- Top-level inherited attributes
@@ -68,5 +69,5 @@ instance Printable Tm where
 
 -- | The top-level inherited attributes to be passed to an attribute grammar
 -- for System F.
-inh_Tm :: Inh_Tm
-inh_Tm = Inh_Tm {prec_Inh_Tm = 0}
+inh_SFTm :: Inh_SFTm
+inh_SFTm = Inh_SFTm {prec_Inh_SFTm = 0}

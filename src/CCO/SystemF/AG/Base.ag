@@ -1,25 +1,21 @@
 imports
 {
 import CCO.SourcePos
+import CCO.Types
 }
 
 -------------------------------------------------------------------------------
 -- Syntax
 -------------------------------------------------------------------------------
 
-{
-type TyVar = String    -- ^ Type of type variables. 
-type Var   = String    -- ^ Type of variables.
-}
+data SFTy
+  | SFTyVar   a :: {TyVar}
+  | SFArr     ty1 :: SFTy  ty2 :: SFTy
+  | SFForall  a :: {TyVar}  ty1 :: SFTy
 
-data Ty
-  | TyVar   a :: {TyVar}
-  | Arr     ty1 :: Ty  ty2 :: Ty
-  | Forall  a :: {TyVar}  ty1 :: Ty
-
-data Tm
-  | Var    x :: {Var}
-  | Lam    x :: {Var}  ty :: Ty  t1 :: Tm
-  | App    t1 :: Tm  t2 :: Tm
-  | TyLam  a :: {TyVar}  t1 :: Tm
-  | TyApp  t1 :: Tm  ty :: Ty
+data SFTm
+  | SFVar    x :: {Var}
+  | SFLam    x :: {Var}  ty :: SFTy  t1 :: SFTm
+  | SFApp    t1 :: SFTm  t2 :: SFTm
+  | SFTyLam  a :: {TyVar}  t1 :: SFTm
+  | SFTyApp  t1 :: SFTm  ty :: SFTy
