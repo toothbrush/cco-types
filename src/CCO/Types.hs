@@ -14,3 +14,4 @@ module CCO.Types (TyVar,Var,TyEnv,TyScheme (..),Ty (..),TySubst (..)) where
     data TySubst  = Identity
                   | Sub TyVar Ty
                   | Dot TySubst TySubst
+

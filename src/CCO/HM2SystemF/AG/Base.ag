@@ -3,6 +3,8 @@ imports
 import CCO.SourcePos
 import CCO.HM.Base
 import CCO.SystemF.Base
+
+import Data.List
 }
 
 -------------------------------------------------------------------------------
@@ -10,45 +12,73 @@ import CCO.SystemF.Base
 -------------------------------------------------------------------------------
 
 
---SystemF:
---data Ty
---  | TyVar   a :: {TyVar}
---  | Arr     ty1 :: Ty  ty2 :: Ty
---  | Forall  a :: {TyVar}  ty1 :: Ty
+--SF : data Ty
+--SF :   | TyVar   a :: {TyVar}
+--SF :   | Arr     ty1 :: Ty  ty2 :: Ty
+--SF :   | Forall  a :: {TyVar}  ty1 :: Ty
+--SF : 
+--SF : data Tm
+--SF :   | Var    x :: {Var}
+--SF :   | Lam    x :: {Var}  ty :: Ty  t1 :: Tm
+--SF :   | App    t1 :: Tm  t2 :: Tm
+--SF :   | TyLam  a :: {TyVar}  t1 :: Tm
+--SF :   | TyApp  t1 :: Tm  ty :: Ty
 --
---data Tm
---  | Var    x :: {Var}
---  | Lam    x :: {Var}  ty :: Ty  t1 :: Tm
---  | App    t1 :: Tm  t2 :: Tm
---  | TyLam  a :: {TyVar}  t1 :: Tm
---  | TyApp  t1 :: Tm  ty :: Ty
---
---HM:
---data Tm
---  | Tm  pos :: {SourcePos}  t :: Tm_
---
---data Tm_
---  | Var  x :: {Var}
---  | Lam  x :: {Var}  t1 :: Tm
---  | App  t1 :: Tm  t2 :: Tm
---  | Let  x :: {Var}  t1 :: Tm  t2 :: Tm
+--HM : data Tm
+--HM :   | Tm  pos :: {SourcePos}  t :: Tm_
+--HM : 
+--HM : data Tm_
+--HM :   | Var  x :: {Var}
+--HM :   | Lam  x :: {Var}  t1 :: Tm
+--HM :   | App  t1 :: Tm  t2 :: Tm
+--HM :   | Let  x :: {Var}  t1 :: Tm  t2 :: Tm
 
 attr HMTm HMTm_
     syn algoW           :: {(SFTm,Ty,TySubst)}
     inh typeEnvironment :: {TyEnv}
  
+attr HMTm HMTm_
+    chn counter :: {Int}
+
+sem HMTm
+    | HMTm lhs.counter = @lhs.counter+1
+
+
 sem HMTm
     | HMTm lhs.algoW = @t.algoW
 
 sem HMTm_
-    | Var lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
-    | Lam lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
+    | Var lhs.algoW = if elem @x (map fst @lhs.typeEnvironment)
+                        then (SFVar @x, inst (getVar @x @lhs.typeEnvironment), Identity)
+                        else error ("Variable "++ @x ++" not found in environment.")
+    | Lam lhs.algoW = let alpha1 = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
+                          (sft1, tau2, theta1) = @t1.algoW
+                      in  (sft1
+                          , Arrow (applySchemeTy theta1 alpha1) (tau2)
+                          , theta1
+                          )
+
     | App lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
     | Let lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
 
 
 
 {
+getVar :: Var -> TyEnv -> TyScheme
+getVar x env = case lookup x env of
+                Just scheme -> scheme
+                _           -> error ("This shouldn't happen. "++x++" wasn't found in the environment.")
+
+applySchemeTy :: TySubst -> Ty-> Ty
+applySchemeTy Identity t = t
+
+applyScheme :: TySubst -> TyScheme -> TyScheme
+applyScheme Identity sch = sch
+applyScheme _        _   = undefined
+
+applyEnvironment :: TySubst -> TyEnv -> TyEnv
+applyEnvironment = undefined
+
 gen :: TyEnv -> Ty -> TyScheme
 gen env tau = undefined
 

@@ -16,3 +16,4 @@ data HMTm_
   | Lam  x :: {Var}  t1 :: HMTm
   | App  t1 :: HMTm  t2 :: HMTm
   | Let  x :: {Var}  t1 :: HMTm  t2 :: HMTm
+

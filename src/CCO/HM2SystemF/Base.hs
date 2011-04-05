@@ -28,4 +28,6 @@ runAlgoW t = let (sf,ty,tysbst) = algoW_Syn_HMTm (wrap_HMTm (sem_HMTm t) inh_HMT
 -- for System F. In our case, we want to start with an empty type 
 -- environment.
 inh_HMTm :: Inh_HMTm
-inh_HMTm = Inh_HMTm {typeEnvironment_Inh_HMTm = []}
+inh_HMTm = Inh_HMTm { typeEnvironment_Inh_HMTm = []
+                    , counter_Inh_HMTm = 0
+                    }

@@ -45,3 +45,7 @@ instance Tree HMTm_ where
                      , app "App" (App <$> arg <*> arg        )
                      , app "Let" (Let <$> arg <*> arg <*> arg)
                      ]
+
+instance Eq HMTm_ where
+    (==) (Var x) (Var y) = x == y
+    (==) _       _       = undefined
