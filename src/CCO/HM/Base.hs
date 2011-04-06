@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeSynonymInstances #-}
 -------------------------------------------------------------------------------
 -- |
 -- Module      :  CCO.HM.Base
@@ -59,3 +60,11 @@ instance Substitutable Ty where
     applySubst s@(Sub a  t0) (Arrow t1 t2) = Arrow
                                               (applySubst s t1)
                                               (applySubst s t2)
+
+instance Substitutable TyScheme where
+    applySubst s (PlainTy t)    = PlainTy (applySubst s t)
+    applySubst s (Forall tv ts) = undefined
+
+instance Substitutable TyEnv where
+    applySubst s []         = []
+    applySubst s ((v,ts):r) = (v,applySubst s ts):applySubst s r
