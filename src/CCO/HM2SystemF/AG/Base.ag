@@ -5,6 +5,7 @@ import CCO.HM.Base
 import CCO.SystemF.Base
 
 import Data.List
+import Debug.Trace
 }
 
 -------------------------------------------------------------------------------
@@ -57,11 +58,17 @@ sem HMTm_
                           , theta1
                           )
           loc.freshVariable = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
-    | App lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
+    | App lhs.algoW = let (sft1, tau1, theta1) = @t1.algoW
+                          (sft2, tau2, theta2) = @t2.algoW
+                          theta3               = unify 
+                                                    (applySubst theta2 tau1) 
+                                                    (Arrow tau2 @loc.freshVariable)
+                      in  undefined
+          loc.freshVariable = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
     | Let lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
 
 sem HMTm_
-    | Lam t1.typeEnvironment = (@x,Ty @loc.freshVariable) : @lhs.typeEnvironment 
+    | Lam t1.typeEnvironment = (@x, PlainTy @loc.freshVariable) : @lhs.typeEnvironment 
 
 
 {
@@ -72,11 +79,29 @@ getVar x env = case lookup x env of
                                 ++x++" wasn't found in the environment.")
 
 gen :: TyEnv -> Ty -> TyScheme
-gen env tau = undefined
+gen env tau = let free = ftvT tau \\ ftvTE env
+              in  wrapForall free tau
+
+wrapForall :: [Var] -> Ty -> TyScheme
+wrapForall []     t = PlainTy t
+wrapForall (v:vs) t = Forall v (wrapForall vs t)
 
 inst :: TyScheme -> Ty
-inst = undefined
+inst (PlainTy t)  = t
+inst (Forall t s) = undefined
 
 unify :: Ty -> Ty -> TySubst
-unify t1 t2 = undefined
+unify t1 t2 = trace "unify" undefined
+
+ftvT :: Ty -> [Var]
+ftvT (Alpha tv)    = [tv]
+ftvT (Arrow t1 t2) = nub(ftvT t1 ++ ftvT t2)
+
+ftvTS :: TyScheme -> [Var]
+ftvTS (PlainTy t)    = ftvT t
+ftvTS (Forall tv ts) = nub (ftvTS ts) \\ [tv]
+
+ftvTE :: TyEnv -> [Var]
+ftvTE []         = []
+ftvTE ((v,ts):r) = ftvTS ts ++ ftvTE r
 }
