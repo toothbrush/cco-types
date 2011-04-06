@@ -65,7 +65,7 @@ sem HMTm_
                                                     (Arrow tau2 @loc.freshVariable)
                       in  undefined
           loc.freshVariable = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
-    | Let lhs.algoW = (SFVar "s", Alpha "Bool", Identity)
+    | Let lhs.algoW = undefined
 
 sem HMTm_
     | Lam t1.typeEnvironment = (@x, PlainTy @loc.freshVariable) : @lhs.typeEnvironment 

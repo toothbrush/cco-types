@@ -31,22 +31,24 @@ import Debug.Trace
 
 runAlgoW :: HMTm -> SFTm
 runAlgoW t = let (sf,ty,tysbst) = algoW_Syn_HMTm (wrap_HMTm (sem_HMTm t) inh_HMTm)
-                 tyscheme       = gen (applySubst tysbst [("x", PlainTy (Alpha "Bool"))]) ty
+                 tyscheme       = gen (applySubst tysbst []) ty
                  finaltype      = turnIntoTypedTerm sf tyscheme
-             in  finaltype
+             in  trace (show tyscheme) finaltype
 
+-- don't trust this:
 turnIntoTypedTerm :: SFTm -> TyScheme -> SFTm
 turnIntoTypedTerm tm (PlainTy t)    = SFTyApp tm (convertType t)
-turnIntoTypedTerm tm (Forall tv ts) = undefined
+turnIntoTypedTerm tm (Forall tv ts) = SFTyLam tv (turnIntoTypedTerm tm ts) -- App tm (SFForall tv (turnIntoTypedTerm tm ts))
 
+-- seems fine:
 convertType :: Ty -> SFTy
-convertType (Alpha t) = SFTyVar t
-convertType _ = undefined
+convertType (Alpha t)     = SFTyVar t
+convertType (Arrow t1 t2) = SFArr (convertType t1) (convertType t2)
 
 -- | The top-level inherited attribute to be passed to an attribute grammar
 -- for System F. In our case, we want to start with an empty type 
 -- environment.
 inh_HMTm :: Inh_HMTm
-inh_HMTm = Inh_HMTm { typeEnvironment_Inh_HMTm = [("x", PlainTy (Alpha "Bool"))]
+inh_HMTm = Inh_HMTm { typeEnvironment_Inh_HMTm = []
                     , counter_Inh_HMTm = 0
                     }
