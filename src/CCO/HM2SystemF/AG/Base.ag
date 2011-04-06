@@ -40,9 +40,16 @@ attr HMTm HMTm_
  
 attr HMTm HMTm_
     chn counter :: {Int}
+--    loc num :: UNIQUEREF counter
 
 sem HMTm
-    | HMTm lhs.counter = @lhs.counter+1
+    | HMTm loc.num = UNIQUEREF counter
+
+sem HMTm_
+    | Var  loc.num = UNIQUEREF counter
+    | Lam  loc.num = UNIQUEREF counter
+    | App  loc.num = UNIQUEREF counter
+    | Let  loc.num = UNIQUEREF counter
 
 
 sem HMTm
@@ -57,21 +64,48 @@ sem HMTm_
                           , Arrow (applySubst theta1 @loc.freshVariable) (tau2)
                           , theta1
                           )
-          loc.freshVariable = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
+          loc.freshVariable = trace ("dishing out " ++ show @loc.num) (Alpha ('v' : show @loc.num ))-- a fresh variable, hopefully.
     | App lhs.algoW = let (sft1, tau1, theta1) = @t1.algoW
                           (sft2, tau2, theta2) = @t2.algoW
+                          fresh = @loc.freshVariable
                           theta3               = unify 
                                                     (applySubst theta2 tau1) 
-                                                    (Arrow tau2 @loc.freshVariable)
-                      in  undefined
-          loc.freshVariable = Alpha ('v' : show @lhs.counter) -- a fresh variable, hopefully.
-    | Let lhs.algoW = undefined
+                                                    (Arrow tau2 fresh)
+                      in  (SFApp sft1 sft2, 
+                           applySubst theta3 fresh,
+                           Dot theta3 (
+                            Dot theta2 (
+                             theta1)
+                            )
+                           )
+          loc.theta1 = let (_,_,theta1) = @t1.algoW
+                       in  theta1
+          t2.typeEnvironment = applySubst @loc.theta1 @lhs.typeEnvironment
+          loc.freshVariable = trace ("dishing out " ++ show @loc.num) (Alpha ('v' : show @loc.num)) -- a fresh variable, hopefully.
+    | Let lhs.algoW = let (tm1, tau1, theta1) = @t1.algoW
+                          (tm2, tau , theta2) = @t2.algoW
+                          lambdaterm = SFApp (SFLam @x (convertType tau1) tm2) tm1
+                      in  (lambdaterm, tau , Dot theta2 theta1)
+          loc.theta1 = let (_,_,theta1) = @t1.algoW
+                       in theta1 
+          loc.tau1   = let (_,tau1,_  ) = @t1.algoW
+                       in tau1
+          t2.typeEnvironment = applySubst @loc.theta1 
+                                    ((@x, 
+                                      gen 
+                                        (applySubst @loc.theta1 @lhs.typeEnvironment) 
+                                        @loc.tau1
+                                     )
+                                                        : @lhs.typeEnvironment)
 
 sem HMTm_
     | Lam t1.typeEnvironment = (@x, PlainTy @loc.freshVariable) : @lhs.typeEnvironment 
 
 
 {
+nextUnique :: Int -> (Int, Int)
+nextUnique u = (u+1, u)
+
 getVar :: Var -> TyEnv -> TyScheme
 getVar x env = case lookup x env of
                 Just scheme -> scheme
@@ -88,10 +122,24 @@ wrapForall (v:vs) t = Forall v (wrapForall vs t)
 
 inst :: TyScheme -> Ty
 inst (PlainTy t)  = t
-inst (Forall t s) = undefined
+inst (Forall t s) = trace "inst" undefined
 
 unify :: Ty -> Ty -> TySubst
-unify t1 t2 = trace "unify" undefined
+unify t1@(Alpha tv1) t2@(Alpha tv2) | tv1 == tv2 = Identity
+                                    | not (elem tv1 (ftvT t2)) = Sub tv1 t2
+                                    | not (elem tv2 (ftvT t1)) = Sub tv2 t1
+                                    | otherwise  = trace "unify" undefined
+unify (Alpha tv1) t | not (elem tv1 (ftvT t)) = Sub tv1 t
+                    | otherwise              = error$"occurs check: " ++
+                                                      show tv1 ++ ", " ++
+                                                      show t
+unify t (Alpha tv2) | not (elem tv2 (ftvT t)) = Sub tv2 t
+                    | otherwise              = error "occurs check2"
+unify (Arrow t11 t12) (Arrow t21 t22) = let theta1 = unify t11 t21
+                                            theta2 = unify 
+                                                        (applySubst theta1 t12)
+                                                        (applySubst theta1 t22)
+                                        in Dot theta2 theta1
 
 ftvT :: Ty -> [Var]
 ftvT (Alpha tv)    = [tv]
@@ -104,4 +152,10 @@ ftvTS (Forall tv ts) = nub (ftvTS ts) \\ [tv]
 ftvTE :: TyEnv -> [Var]
 ftvTE []         = []
 ftvTE ((v,ts):r) = ftvTS ts ++ ftvTE r
+
+-- seems fine:
+convertType :: Ty -> SFTy
+convertType (Alpha t)     = SFTyVar t
+convertType (Arrow t1 t2) = SFArr (convertType t1) (convertType t2)
+
 }
