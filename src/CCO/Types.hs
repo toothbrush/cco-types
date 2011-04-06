@@ -14,15 +14,18 @@ module CCO.Types (
 
     type TyEnv    = [(Var,TyScheme)]
 
-    data TyScheme = Ty Ty
+    data TyScheme = PlainTy Ty
                   | Forall TyVar TyScheme
+                  deriving Show
 
     data Ty       = Alpha TyVar
                   | Arrow Ty Ty
+                  deriving Show
 
     data TySubst  = Identity
                   | Sub TyVar Ty
                   | Dot TySubst TySubst
+                  deriving Show
 
     class Substitutable a where
         applySubst :: TySubst -> a -> a
