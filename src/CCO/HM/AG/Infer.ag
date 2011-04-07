@@ -82,8 +82,9 @@ freshVar i = TyVar $ 'v' : (show i)
 
 inst :: Ty -> Ty
 inst t@(TyVar _)    = t
-inst (Arr t1 t2)    = trace "inst Arr" undefined
-inst (Forall tv t1) = trace "inst Forall" undefined
+inst t@(Arr t1 t2)  = trace "inst Arr (guessing!)" t
+inst (Forall tv t1) = applySubst (Sub tv (TyVar fresh)) (inst t1)
+                        where fresh = (tv ++ "'")
 
 gen :: TyEnv -> Ty -> Ty
 gen env tau = let free = ftv tau \\ ftv env
@@ -93,6 +94,7 @@ wrapForall :: [Var] -> Ty -> Ty
 wrapForall [] t = t
 wrapForall (v:vs) t = Forall v (wrapForall vs t)
 
+-- This gives us unique variable numbers
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
 

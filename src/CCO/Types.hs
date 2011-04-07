@@ -32,7 +32,9 @@ module CCO.Types where
         applySubst s@(Sub a t0) (Arr t1 t2) = Arr
                                                   (applySubst s t1)
                                                   (applySubst s t2)
-        applySubst s (Forall tv ts) = trace "applySubst Forall" undefined
+        applySubst s@(Sub a t0) (Forall tv ts) = if a == tv
+                                                    then trace "hmmmm" (Forall tv t0)
+                                                    else Forall tv (applySubst s ts)
 
     instance Substitutable TyEnv where
         applySubst s [] = []
