@@ -27,6 +27,8 @@ import qualified CCO.Tree as T    (ATerm (App))
 import CCO.Tree.Parser            (parseTree, app, arg)
 import Control.Applicative        (Applicative ((<*>)), (<$>))
 
+import Debug.Trace
+
 -------------------------------------------------------------------------------
 -- Tree instances
 -------------------------------------------------------------------------------
@@ -49,7 +51,7 @@ instance Tree HMTm_ where
 
 instance Eq HMTm_ where
     (==) (Var x) (Var y) = x == y
-    (==) _       _       = undefined
+    (==) _       _       = trace "Eq HMTm_" undefined
 
 instance Substitutable Ty where
     applySubst Identity    t = t
@@ -63,7 +65,7 @@ instance Substitutable Ty where
 
 instance Substitutable TyScheme where
     applySubst s (PlainTy t)    = PlainTy (applySubst s t)
-    applySubst s (Forall tv ts) = undefined
+    applySubst s (Forall tv ts) = trace "applySubst TyScheme" undefined
 
 instance Substitutable TyEnv where
     applySubst s []         = []
