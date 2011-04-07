@@ -61,6 +61,11 @@ sem Tm_
                                    alpha1 = freshVar @loc.num
                                    tau2   = @t1.inferredType
                                in  Arr (applySubst theta1 alpha1) tau2
+    | App lhs.inferredType   = let alpha1 = freshVar @loc.num
+                                   theta2 = @t2.substitution
+                                   theta3 = unify (applySubst theta2 @t1.inferredType) (Arr (@t2.inferredType) alpha1)
+                               in  applySubst theta3 alpha1
+
 
 
 
