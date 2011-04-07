@@ -25,6 +25,7 @@ import CCO.HM.AG (
     Inh_Tm (..)
     )
 import qualified CCO.SystemF.AG as SF (Tm (..))
+import CCO.Types
 
 import Debug.Trace
 
@@ -32,7 +33,9 @@ doConversion :: Tm -> SF.Tm
 doConversion t = let inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
 --                     finaltype = turnIntoTypedTerm sf tyscheme
-                 in trace (show (inferredType,substitution)) (SF.Var "s")
+                 in trace (show (inferredType,substitution) ++
+                            "\nSubstituted: " ++ (show $applySubst substitution inferredType)) 
+                            (SF.Var "s")
 
 -- | The top-level inherited attribute to be passed to an attribute grammar
 -- for System F. In our case, we want to start with an empty type

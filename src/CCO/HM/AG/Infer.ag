@@ -11,6 +11,9 @@ attr Tm Tm_
     inh typeEnvironment :: {TyEnv} -- DONE I think...
     chn counter :: {Int} -- Useful for creating unique, fresh variables
 
+attr Tm
+    syn annotated :: {SF.Tm}
+
 sem Tm
     | Tm loc.num :: uniqueref counter
 sem Tm_
@@ -24,6 +27,12 @@ sem Tm_
 -- SF :   | TyVar   a :: {TyVar}
 -- SF :   | Arr     ty1 :: Ty  ty2 :: Ty
 -- SF :   | Forall  a :: {TyVar}  ty1 :: Ty
+-- SF : data Tm
+-- SF :      | Var    x :: {Var}
+-- SF :      | Lam    x :: {Var}  ty :: Ty  t1 :: Tm
+-- SF :      | App    t1 :: Tm  t2 :: Tm
+-- SF :      | TyLam  a :: {TyVar}  t1 :: Tm
+-- SF :      | TyApp  t1 :: Tm  ty :: Ty
 --
 -- HM : data Tm
 -- HM :   | Tm  pos :: {SourcePos}  t :: Tm_
@@ -43,6 +52,8 @@ sem Tm_
 -- SOME WORK HERE ?? 
 -- sem Tm
 --     | apply the generalise function!
+sem Tm
+    | Tm  lhs.annotated = undefined
 
 sem Tm_
     | Var lhs.substitution   = Identity
