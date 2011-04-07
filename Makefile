@@ -17,5 +17,6 @@ haskell : src/CCO/HM/AG.hs src/CCO/SystemF/AG.hs
 clean : 
 	-rm src/CCO/HM/AG.hs
 	-rm src/CCO/SystemF/AG.hs
+	cabal clean
 
 .PHONY : haskell clean
