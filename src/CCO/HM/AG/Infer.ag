@@ -38,6 +38,9 @@ sem Tm_
     | Let t2.typeEnvironment = let newEnv = applySubst @t1.substitution @lhs.typeEnvironment
                                in  (@x, gen newEnv @t1.inferredType) : newEnv
 
+-- SOME WORK HERE ?? 
+-- sem Tm
+--     | apply the generalise function!
 
 sem Tm_
     | Var lhs.substitution   = Identity
