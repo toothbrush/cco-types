@@ -65,6 +65,7 @@ sem Tm_
                                    theta2 = @t2.substitution
                                    theta3 = unify (applySubst theta2 @t1.inferredType) (Arr (@t2.inferredType) alpha1)
                                in  applySubst theta3 alpha1
+    | Let lhs.inferredType   = @t2.inferredType
 
 
 
