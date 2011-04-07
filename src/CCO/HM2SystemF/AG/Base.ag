@@ -38,26 +38,32 @@ attr HMTm HMTm_
     syn algoW           :: {(SFTm,Ty,TySubst)} -- => 3 attributen.
     inh typeEnvironment :: {TyEnv}
  
+--attr HMTm HMTm_
+--    inh counter :: {[Int]}
+--    syn counter :: {[Int]}
 attr HMTm HMTm_
-    inh counter :: {[Int]}
-    syn counter :: {[Int]}
-
+   chn counter :: {Int}
 sem HMTm
-    | HMTm loc.num = head @lhs.counter
-           t.counter = tail @lhs.counter
-           
-
+   | HMTm loc.num :: uniqueref counter
 sem HMTm_
-    | Var  loc.num = head @lhs.counter
-    | Lam  loc.num = head @lhs.counter
-             t1.counter = tail @lhs.counter
-           
-    | App  loc.num = head @lhs.counter
-             t1.counter = tail @lhs.counter
-             t2.counter = @t1.counter
-    | Let  loc.num = head @lhs.counter
-             t1.counter = tail @lhs.counter
-             t2.counter = @t1.counter
+   | Var  loc.num :: uniqueref counter 
+   | Lam  loc.num :: uniqueref counter 
+   | App  loc.num :: uniqueref counter 
+   | Let  loc.num :: uniqueref counter 
+--sem HMTm
+--    | HMTm loc.num = head @lhs.counter
+--           t.counter = tail @lhs.counter
+--sem HMTm_
+--    | Var  loc.num = head @lhs.counter
+--    | Lam  loc.num = head @lhs.counter
+--             t1.counter = tail @lhs.counter
+--           
+--    | App  loc.num = head @lhs.counter
+--             t1.counter = tail @lhs.counter
+--             t2.counter = @t1.counter
+--    | Let  loc.num = head @lhs.counter
+--             t1.counter = tail @lhs.counter
+--             t2.counter = @t1.counter
 
 
 sem HMTm

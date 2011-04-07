@@ -46,5 +46,5 @@ turnIntoTypedTerm tm (Forall tv ts) = SFTyLam tv (turnIntoTypedTerm tm ts) -- Ap
 -- environment.
 inh_HMTm :: Inh_HMTm
 inh_HMTm = Inh_HMTm { typeEnvironment_Inh_HMTm = []
-                    , counter_Inh_HMTm = [0..]
+                    , counter_Inh_HMTm = 0
                     }
