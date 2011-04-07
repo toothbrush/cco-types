@@ -1,15 +1,12 @@
 imports
 {
 import CCO.SourcePos
+import CCO.Types
 }
 
 -------------------------------------------------------------------------------
 -- Syntax
 -------------------------------------------------------------------------------
-
-{
-type Var = String    -- ^ Type of variables.
-}
 
 data Tm
   | Tm  pos :: {SourcePos}  t :: Tm_

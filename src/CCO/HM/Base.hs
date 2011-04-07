@@ -19,6 +19,7 @@ module CCO.HM.Base (
   , Tm_ (Var, Lam, App, Let)    -- instances: Tree
 ) where
 
+import CCO.Types
 import CCO.HM.AG
 import CCO.Tree                   (Tree (fromTree, toTree))
 import qualified CCO.Tree as T    (ATerm (App))

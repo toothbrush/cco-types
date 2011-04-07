@@ -1,6 +1,8 @@
 imports
 {
-import CCO.SourcePos
 }
 
 attr Tm Tm_
+    syn inferredType :: {Ty}
+    syn substitution :: {TySubst}
+    inh typeEnvironment :: {TyEnv}
