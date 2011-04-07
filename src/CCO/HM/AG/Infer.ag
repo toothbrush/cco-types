@@ -1,5 +1,7 @@
 imports
 {
+import Data.List
+
 import Debug.Trace
 }
 
@@ -84,8 +86,12 @@ inst (Arr t1 t2)    = trace "inst Arr" undefined
 inst (Forall tv t1) = trace "inst Forall" undefined
 
 gen :: TyEnv -> Ty -> Ty
-gen env tau = undefined {- let free = ftvT tau \\ ftvTE env
-              in wrapForall free tau -}
+gen env tau = let free = ftv tau \\ ftv env
+              in wrapForall free tau
+
+wrapForall :: [Var] -> Ty -> Ty
+wrapForall [] t = t
+wrapForall (v:vs) t = Forall v (wrapForall vs t)
 
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)

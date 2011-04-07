@@ -2,6 +2,7 @@
              TypeSynonymInstances #-}
 module CCO.Types where
     import CCO.SystemF.AG (Ty (..))
+    import Data.List
 
     import Debug.Trace
     
@@ -18,6 +19,9 @@ module CCO.Types where
 
     class Substitutable a where
         applySubst :: TySubst -> a -> a
+    
+    class HasTypeVariables a where
+        ftv :: a -> [Var]
 
     instance Substitutable Ty where
         applySubst Identity t = t
@@ -36,14 +40,14 @@ module CCO.Types where
 
     unify :: Ty -> Ty -> TySubst
     unify t1@(TyVar tv1) t2@(TyVar tv2) | tv1 == tv2 = Identity
-                                        | not (elem tv1 (ftvT t2)) = Sub tv1 t2
-                                        | not (elem tv2 (ftvT t1)) = Sub tv2 t1
+                                        | not (elem tv1 (ftv t2)) = Sub tv1 t2
+                                        | not (elem tv2 (ftv t1)) = Sub tv2 t1
                                         | otherwise = trace "unify" undefined
-    unify (TyVar tv1) t | not (elem tv1 (ftvT t)) = Sub tv1 t
+    unify (TyVar tv1) t | not (elem tv1 (ftv t)) = Sub tv1 t
                         | otherwise = error$"occurs check: " ++
                                                           show tv1 ++ ", " ++
                                                           show t
-    unify t (TyVar tv2) | not (elem tv2 (ftvT t)) = Sub tv2 t
+    unify t (TyVar tv2) | not (elem tv2 (ftv t)) = Sub tv2 t
                         | otherwise = error "occurs check2"
     unify (Arr t11 t12) (Arr t21 t22) = let theta1 = unify t11 t21
                                             theta2 = unify
@@ -51,4 +55,11 @@ module CCO.Types where
                                                         (applySubst theta1 t22)
                                         in Dot theta2 theta1
         
-    ftvT = undefined
+    instance HasTypeVariables Ty where
+        ftv (TyVar tv) = [tv]
+        ftv (Arr t1 t2) = nub(ftv t1 ++ ftv t2)
+        ftv (Forall tv ts) = nub (ftv ts) \\ [tv]
+
+    instance HasTypeVariables TyEnv where
+        ftv [] = []
+        ftv ((v,ts):r) = ftv ts ++ ftv r
