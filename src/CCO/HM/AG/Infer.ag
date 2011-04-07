@@ -6,3 +6,14 @@ attr Tm Tm_
     syn inferredType :: {Ty}
     syn substitution :: {TySubst}
     inh typeEnvironment :: {TyEnv}
+
+attr Tm Tm_
+   chn counter :: {Int}
+sem Tm
+   | Tm loc.num :: uniqueref counter
+sem Tm_
+   | Var loc.num :: uniqueref counter
+   | Lam loc.num :: uniqueref counter
+   | App loc.num :: uniqueref counter
+   | Let loc.num :: uniqueref counter 
+
