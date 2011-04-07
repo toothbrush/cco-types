@@ -33,6 +33,13 @@ sem Tm_
                                in  (@x, gen newEnv @t1.inferredType) : newEnv
 
 
+sem Tm_
+    | Var lhs.substitution   = Identity
+    | Lam lhs.substitution   = @t1.substitution
+    | App lhs.substitution   = let theta1 = @t1.substitution
+                                   theta2 = @t2.substitution
+                                   theta3 = unify (applySubst theta2 @t1.inferredType) (Arr (@t2.inferredType) (freshVar @loc.num))
+                               in Dot theta3 (Dot theta2 theta1)
 
 
 
