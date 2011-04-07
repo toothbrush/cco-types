@@ -5,18 +5,32 @@ imports
 attr Tm Tm_
     syn inferredType :: {Ty}
     syn substitution :: {TySubst}
-    inh typeEnvironment :: {TyEnv}
+    inh typeEnvironment :: {TyEnv} -- DONE I think...
     chn counter :: {Int} -- Useful for creating unique, fresh variables
 
 sem Tm
-   | Tm loc.num :: uniqueref counter
+    | Tm loc.num :: uniqueref counter
 sem Tm_
-   | Var loc.num :: uniqueref counter
-   | Lam loc.num :: uniqueref counter
-   | App loc.num :: uniqueref counter
-   | Let loc.num :: uniqueref counter 
+    | Var loc.num :: uniqueref counter
+    | Lam loc.num :: uniqueref counter
+    | App loc.num :: uniqueref counter
+    | Let loc.num :: uniqueref counter 
 
 
+-- HM : data Tm
+-- HM :   | Tm  pos :: {SourcePos}  t :: Tm_
+-- HM : 
+-- HM : data Tm_
+-- HM :   | Var  x :: {Var}
+-- HM :   | Lam  x :: {Var}  t1 :: Tm
+-- HM :   | App  t1 :: Tm  t2 :: Tm
+-- HM :   | Let  x :: {Var}  t1 :: Tm  t2 :: Tm
+
+sem Tm_
+    | Lam t1.typeEnvironment = (@x, freshVar @loc.num) : @lhs.typeEnvironment
+    | App t2.typeEnvironment = applySubst @t1.substitution @lhs.typeEnvironment
+    | Let t2.typeEnvironment = let newEnv = applySubst @t1.substitution @lhs.typeEnvironment
+                               in  (@x, gen newEnv @t1.inferredType) : newEnv
 
 
 
@@ -27,6 +41,13 @@ sem Tm_
 
 
 {
+freshVar :: Int -> Ty
+freshVar i = TyVar $ 'v' : (show i)
+
+gen :: TyEnv -> Ty -> Ty
+gen env tau = undefined {- let free = ftvT tau \\ ftvTE env
+              in wrapForall free tau -}
+
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
 }
