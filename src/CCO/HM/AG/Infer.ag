@@ -17,3 +17,8 @@ sem Tm_
    | App loc.num :: uniqueref counter
    | Let loc.num :: uniqueref counter 
 
+
+{
+nextUnique :: Int -> (Int, Int)
+nextUnique u = (u+1, u)
+}
