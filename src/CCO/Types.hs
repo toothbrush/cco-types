@@ -14,7 +14,7 @@ module CCO.Types (
 
     type TyEnv    = [(Var,TyScheme)]
 
-    data TyScheme = PlainTy Ty
+    data TyScheme = PlainTy Ty -- TODO dit is een SFTy
                   | Forall TyVar TyScheme
                   deriving Show
 

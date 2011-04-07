@@ -35,21 +35,29 @@ import Debug.Trace
 --HM :   | Let  x :: {Var}  t1 :: Tm  t2 :: Tm
 
 attr HMTm HMTm_
-    syn algoW           :: {(SFTm,Ty,TySubst)}
+    syn algoW           :: {(SFTm,Ty,TySubst)} -- => 3 attributen.
     inh typeEnvironment :: {TyEnv}
  
 attr HMTm HMTm_
-    chn counter :: {Int}
---    loc num :: UNIQUEREF counter
+    inh counter :: {[Int]}
+    syn counter :: {[Int]}
 
 sem HMTm
-    | HMTm loc.num = UNIQUEREF counter
+    | HMTm loc.num = head @lhs.counter
+           t.counter = tail @lhs.counter
+           
 
 sem HMTm_
-    | Var  loc.num = UNIQUEREF counter
-    | Lam  loc.num = UNIQUEREF counter
-    | App  loc.num = UNIQUEREF counter
-    | Let  loc.num = UNIQUEREF counter
+    | Var  loc.num = head @lhs.counter
+    | Lam  loc.num = head @lhs.counter
+             t1.counter = tail @lhs.counter
+           
+    | App  loc.num = head @lhs.counter
+             t1.counter = tail @lhs.counter
+             t2.counter = @t1.counter
+    | Let  loc.num = head @lhs.counter
+             t1.counter = tail @lhs.counter
+             t2.counter = @t1.counter
 
 
 sem HMTm

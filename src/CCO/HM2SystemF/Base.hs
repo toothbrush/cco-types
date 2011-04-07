@@ -19,7 +19,8 @@ import CCO.HM2SystemF.AG (
     wrap_HMTm, 
     sem_HMTm, 
     Inh_HMTm (..),
-    gen
+    gen,
+    convertType
     )
 import CCO.Types
 import CCO.HM.Base (HMTm (..))
@@ -45,5 +46,5 @@ turnIntoTypedTerm tm (Forall tv ts) = SFTyLam tv (turnIntoTypedTerm tm ts) -- Ap
 -- environment.
 inh_HMTm :: Inh_HMTm
 inh_HMTm = Inh_HMTm { typeEnvironment_Inh_HMTm = []
-                   -- , counter_Inh_HMTm = 0
+                    , counter_Inh_HMTm = [0..]
                     }

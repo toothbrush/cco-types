@@ -19,3 +19,4 @@ data SFTm
   | SFApp    t1 :: SFTm  t2 :: SFTm
   | SFTyLam  a :: {TyVar}  t1 :: SFTm
   | SFTyApp  t1 :: SFTm  ty :: SFTy
+
