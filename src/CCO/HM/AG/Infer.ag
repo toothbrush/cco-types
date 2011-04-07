@@ -101,7 +101,7 @@ nextUnique u = (u+1, u)
 getVar :: Var -> TyEnv -> Ty
 getVar x env = case lookup x env of
                 Just scheme -> scheme
-                _ -> error ("This shouldn't happen. "
-                                ++x++" wasn't found in the environment.")
+                _ -> error ("This shouldn't happen. " ++ x ++
+                            " wasn't found in the environment.")
 
 }
