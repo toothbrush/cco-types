@@ -1,5 +1,6 @@
 imports
 {
+import Debug.Trace
 }
 
 attr Tm Tm_
@@ -17,6 +18,11 @@ sem Tm_
     | Let loc.num :: uniqueref counter 
 
 
+-- SF : data Ty
+-- SF :   | TyVar   a :: {TyVar}
+-- SF :   | Arr     ty1 :: Ty  ty2 :: Ty
+-- SF :   | Forall  a :: {TyVar}  ty1 :: Ty
+--
 -- HM : data Tm
 -- HM :   | Tm  pos :: {SourcePos}  t :: Tm_
 -- HM : 
@@ -40,6 +46,18 @@ sem Tm_
                                    theta2 = @t2.substitution
                                    theta3 = unify (applySubst theta2 @t1.inferredType) (Arr (@t2.inferredType) (freshVar @loc.num))
                                in Dot theta3 (Dot theta2 theta1)
+    | Let lhs.substitution   = let theta1 = @t1.substitution
+                                   theta2 = @t2.substitution
+                               in  Dot theta2 theta1
+
+sem Tm_
+    | Var lhs.inferredType   = if elem @x (map fst @lhs.typeEnvironment) -- TODO: check this!
+                                then inst (getVar @x @lhs.typeEnvironment)
+                                else error ("Variable "++ @x ++" not found in environment.")
+    | Lam lhs.inferredType   = let theta1 = @t1.substitution
+                                   alpha1 = freshVar @loc.num
+                                   tau2   = @t1.inferredType
+                               in  Arr (applySubst theta1 alpha1) tau2
 
 
 
@@ -51,10 +69,22 @@ sem Tm_
 freshVar :: Int -> Ty
 freshVar i = TyVar $ 'v' : (show i)
 
+inst :: Ty -> Ty
+inst t@(TyVar _)    = t
+inst (Arr t1 t2)    = trace "inst Arr" undefined
+inst (Forall tv t1) = trace "inst Forall" undefined
+
 gen :: TyEnv -> Ty -> Ty
 gen env tau = undefined {- let free = ftvT tau \\ ftvTE env
               in wrapForall free tau -}
 
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
+
+getVar :: Var -> TyEnv -> Ty
+getVar x env = case lookup x env of
+                Just scheme -> scheme
+                _ -> error ("This shouldn't happen. "
+                                ++x++" wasn't found in the environment.")
+
 }
