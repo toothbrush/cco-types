@@ -14,4 +14,8 @@ haskell : src/CCO/HM/AG.hs src/CCO/SystemF/AG.hs
 	runhaskell Setup.lhs configure $(CABAL-CONFIGURE-FLAGS)
 	runhaskell Setup.lhs build $(CABAL-BUILD-FLAGS)
 
-.PHONY : haskell
+clean : 
+	-rm src/CCO/HM/AG.hs
+	-rm src/CCO/SystemF/AG.hs
+
+.PHONY : haskell clean
