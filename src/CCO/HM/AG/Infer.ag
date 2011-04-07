@@ -6,9 +6,8 @@ attr Tm Tm_
     syn inferredType :: {Ty}
     syn substitution :: {TySubst}
     inh typeEnvironment :: {TyEnv}
+    chn counter :: {Int} -- Useful for creating unique, fresh variables
 
-attr Tm Tm_
-   chn counter :: {Int}
 sem Tm
    | Tm loc.num :: uniqueref counter
 sem Tm_
@@ -16,6 +15,15 @@ sem Tm_
    | Lam loc.num :: uniqueref counter
    | App loc.num :: uniqueref counter
    | Let loc.num :: uniqueref counter 
+
+
+
+
+
+
+
+
+
 
 
 {
