@@ -18,14 +18,23 @@ import Debug.Trace
 }
 
 attr Tm Tm_
+    -- The inferredType attribute will contain the type of the term.
     syn inferredType :: {Ty}
+    -- The substitution attribute will contain the needed substitutions 
+    -- of the type environment.
     syn substitution :: {TySubst}
+    -- The type environment should start empty, then grow as more lambdas
+    -- etc. are encountered.
     inh typeEnvironment :: {TyEnv} -- DONE I think...
-    chn counter :: {Int} -- Useful for creating unique, fresh variables
+    -- The counter is used to generate fresh variable names, which are unique.
+    chn counter :: {Int}
 
 attr Tm Tm_
+    -- This attribute, on HM.Tm, returns a type-annotated SF.Tm term. 
     syn annotated :: {SF.Tm}
 
+-- withoutLet rewrites an expression using the following identity:
+-- let x = t1 in t2 == (\x . t2) t1
 attr Tm
     syn withoutLet :: {Tm}
 attr Tm_
@@ -38,6 +47,9 @@ sem Tm_
     | Lam loc.num :: uniqueref counter
     | App loc.num :: uniqueref counter
     | Let loc.num :: uniqueref counter 
+
+-- all of the following functions are identity, except the case for 
+-- a let-expression, which is rewritten into a let-free expression.
 sem Tm
     | Tm  lhs.withoutLet = Tm @pos @t.withoutLet
 sem Tm_
@@ -46,7 +58,7 @@ sem Tm_
     | App lhs.withoutLet = App @t1.withoutLet @t2.withoutLet
     | Let lhs.withoutLet = App (Tm (SourcePos Stdin EOF) $ Lam @x @t2.withoutLet) @t1.withoutLet
 
-
+-- TODO remove before submission: useful for memory aid
 -- SF : data Ty
 -- SF :   | TyVar   a :: {TyVar}
 -- SF :   | Arr     ty1 :: Ty  ty2 :: Ty
@@ -58,19 +70,17 @@ sem Tm_
 -- SF :      | TyLam  a :: {TyVar}  t1 :: Tm
 -- SF :      | TyApp  t1 :: Tm  ty :: Ty
 
+-- The type environment is modified as specified in Algorithm W. Let's and lambda's 
+-- introduce new variables to the environment.
 sem Tm_
     | Lam t1.typeEnvironment = (@x, freshVar @loc.num) : @lhs.typeEnvironment
     | App t2.typeEnvironment = applySubst @t1.substitution @lhs.typeEnvironment
     | Let t2.typeEnvironment = let newEnv = applySubst @t1.substitution @lhs.typeEnvironment
                                in  (@x, gen newEnv @t1.inferredType) : newEnv
 
--- SOME WORK HERE ?? 
--- sem Tm
---     | apply the generalise function!
-
--- sem Tm
---     | Tm  lhs.annotated = undefined
-
+-- SOME WORK HERE ?? Here we should probably apply the rules 
+-- from figure 2 of the assignment to finally add the inferred types
+-- as annotations. 
 sem Tm_
     | Var lhs.annotated = if elem @x (domain @lhs.typeEnvironment)
                             then SF.TyApp (SF.Var @x) (getVar @x @lhs.typeEnvironment)
@@ -87,7 +97,6 @@ sem Tm_
                             	                (Forall ('v' : show @loc.num) @t1.inferredType) 
                             	                (@t1.annotated)
                             	        )
-                                
     | App lhs.annotated = let f (SF.Arr t1 t2) = t2
                           in
                             case @t1.inferredType of
@@ -96,6 +105,7 @@ sem Tm_
                                 otherwise    -> SF.TyApp (SF.App @t1.annotated @t2.annotated) (f @t1.inferredType)
     | Let lhs.annotated = error "Let should have been rewritten..." undefined 
 
+-- Calculates the substitution as defined in Algorithm W. 
 sem Tm_
     | Var lhs.substitution   = Identity
     | Lam lhs.substitution   = @t1.substitution
@@ -109,6 +119,7 @@ sem Tm_
                                    theta2 = @t2.substitution
                                in  Dot theta2 theta1
 
+-- Does the type inference using helper functions defined here and in CCO.Types. 
 sem Tm_
     | Var lhs.inferredType   = if elem @x (domain @lhs.typeEnvironment) -- TODO: check this!
                                   then inst (getVar @x @lhs.typeEnvironment)
@@ -125,32 +136,51 @@ sem Tm_
     | Let lhs.inferredType   = @t2.inferredType
 
 {
+-- | Turn a number (the counter's current value) into a type variable. 
+-- NOTE: This assumes the user doesn't use variables like v? in the program. 
+--       This seems reasonable, given the scope of the assignment, a workaround
+--       shouldn't be difficult to implement.
 freshVar :: Int -> Ty
 freshVar i = TyVar $ 'v' : (show i)
 
+-- | Instantiate. Specialise a given polymorphic type
+-- with a fresh variable. 
 inst :: Ty -> Ty
 inst t@(TyVar _)    = t
 inst t@(Arr t1 t2)  = trace "inst Arr (guessing!)" t
 inst (Forall tv t1) = applySubst (Sub tv (TyVar fresh)) (inst t1)
                         where fresh = (tv ++ "'")
 
+-- | Generalise function. Finds all unbound type variables in
+-- a type T, and then makes the type into 
+-- "foreach [those variables] T."
 gen :: TyEnv -> Ty -> Ty
 gen env tau = let free = ftv tau \\ ftv env
               in wrapForall free tau
 
+-- | Take a list of variables, and wrap them in a Forall 
+-- clause. That is, imagine the list of variables [a,b,c] is
+-- input along with a certain type T, the output is:
+-- forall a,b,c.T.
+-- Which is again a type. 
 wrapForall :: [Var] -> Ty -> Ty
 wrapForall [] t = t
 wrapForall (v:vs) t = Forall v (wrapForall vs t)
 
--- This gives us unique variable numbers
+-- | This gives us unique variable numbers, incrementing the seed each time.
+-- Automatically invoked by AG system when the keyword 'uniqueref' is used next 
+-- to an attribute.
 nextUnique :: Int -> (Int, Int)
 nextUnique u = (u+1, u)
 
+-- | Look up a variable's type in the given environment.
 getVar :: Var -> TyEnv -> Ty
 getVar x env = case lookup x env of
                 Just scheme -> scheme
                 _ -> error ("This shouldn't happen. " ++ x ++
                             " wasn't found in the environment.")
 
+-- | This simple alias turns a type environment into the list
+-- of variables it contains information for. 
 domain = map fst
 }
