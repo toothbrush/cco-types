@@ -1,5 +1,19 @@
 {-# LANGUAGE StandaloneDeriving,
              TypeSynonymInstances #-}
+-------------------------------------------------------------------------------
+-- |
+-- Module      :  CCO.Types
+-- Copyright   :  (c) 2008 Utrecht University
+-- License     :  All rights reserved
+--
+-- Maintainer  :  Paul van der Walt <paul@denknerd.nl>
+-- Stability   :  provisional
+-- Portability :  portable
+--
+-- This module contains some types which are useful for Algorithm W. 
+-- A number of helper functions are also defined here. 
+--
+-------------------------------------------------------------------------------
 module CCO.Types where
     import CCO.SystemF.AG (Ty (..), Tm (..))
     import Data.List
@@ -10,14 +24,19 @@ module CCO.Types where
     type TyVar = String
     type Var   = String
     
-    data TySubst = Identity
-                 | Sub TyVar Ty
-                 | Dot TySubst TySubst
+    -- | A type substitution. Used for substitution of type variables
+    -- in signatures. 
+    data TySubst = Identity -- ^ Identity substitution, do nothing. 
+                 | Sub TyVar Ty -- ^ Substitute a type variable with a type. 
+                 | Dot TySubst TySubst -- ^ Chain substitutions together.
                  deriving Show
 
     deriving instance Show Ty
     deriving instance Show Tm
 
+    -- | A class which is useful for defining functions such as 'applySubst' (which
+    -- substitutes all occurences of a variable with a type, and 'ftv' which returns
+    -- all the free type variables in the argument.
     class Types a where
         applySubst :: TySubst -> a -> a
         ftv        :: a -> [Var]
@@ -44,6 +63,7 @@ module CCO.Types where
         ftv [] = []
         ftv ((v,ts):r) = ftv ts ++ ftv r
 
+    -- | The unification algorithm. If none of the cases match, fail.
     unify :: Ty -> Ty -> TySubst
     unify t1@(TyVar tv1) t2@(TyVar tv2) | tv1 == tv2 = Identity
                                         | not (elem tv1 (ftv t2)) = Sub tv1 t2
@@ -62,3 +82,4 @@ module CCO.Types where
                                                         (applySubst theta1 t12)
                                                         (applySubst theta1 t22)
                                         in Dot theta2 theta1
+    unify _ _ = error "Unification failure."

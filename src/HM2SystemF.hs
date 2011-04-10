@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+--
+-- Simple pipeline which calls the AG code. 
+-- Input:  parsed Hindley-Milner term,
+-- Output: type-annotated System F term,
+-- Both in ATerm format (portable text format, useful
+-- for pipelining functions in the terminal).
+--
+-- Author : Paul van der Walt <paul@denknerd.nl>
+--
+--------------------------------------------------------------------------------
 import CCO.Component (Component, component, printer, ioWrap)
 import CCO.HM.Base (Tm)
 import CCO.HM2SystemF (doConversion)
@@ -12,7 +23,9 @@ main = ioWrap $
         (arr fromTree :: Component SF.Tm ATerm) >>>
         printer
 
--- | constructs a really simple term, for testing.
+-- | Calls the 'doConversion' function, which runs the 
+-- AG code on the parsed Hindley-Milner term. Returns 
+-- a type-annotated System F term.
 convertAndType :: Component Tm SF.Tm
 convertAndType = component $ (\s -> do return (doConversion s))
 

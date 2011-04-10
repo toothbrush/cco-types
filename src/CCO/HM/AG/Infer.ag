@@ -1,3 +1,14 @@
+-------------------------------------------------------------------------------
+-- 
+-- The type inferencer AG. 
+--
+-- This is where the functions reside which are needed to
+-- convert an HM term (implicitly typed) into a System F term,
+-- which is explicitly typed. 
+--
+-- Author : Paul van der Walt <paul@denknerd.nl>
+-------------------------------------------------------------------------------
+
 imports
 {
 import Data.List
