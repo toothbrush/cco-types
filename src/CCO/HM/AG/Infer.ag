@@ -1,6 +1,7 @@
 imports
 {
 import Data.List
+import Data.Maybe
 
 import Debug.Trace
 }
@@ -11,16 +12,28 @@ attr Tm Tm_
     inh typeEnvironment :: {TyEnv} -- DONE I think...
     chn counter :: {Int} -- Useful for creating unique, fresh variables
 
-attr Tm
+attr Tm Tm_
     syn annotated :: {SF.Tm}
 
+attr Tm
+    syn withoutLet :: {Tm}
+attr Tm_
+    syn withoutLet :: {Tm_}
+
 sem Tm
-    | Tm loc.num :: uniqueref counter
+    | Tm  loc.num :: uniqueref counter
 sem Tm_
     | Var loc.num :: uniqueref counter
     | Lam loc.num :: uniqueref counter
     | App loc.num :: uniqueref counter
     | Let loc.num :: uniqueref counter 
+sem Tm
+    | Tm  lhs.withoutLet = Tm @pos @t.withoutLet
+sem Tm_
+    | Var lhs.withoutLet = @self
+    | Lam lhs.withoutLet = Lam @x @t1.withoutLet
+    | App lhs.withoutLet = App @t1.withoutLet @t2.withoutLet
+    | Let lhs.withoutLet = App (Tm (SourcePos Stdin EOF) $ Lam @x @t2.withoutLet) @t1.withoutLet
 
 
 -- SF : data Ty
@@ -33,15 +46,6 @@ sem Tm_
 -- SF :      | App    t1 :: Tm  t2 :: Tm
 -- SF :      | TyLam  a :: {TyVar}  t1 :: Tm
 -- SF :      | TyApp  t1 :: Tm  ty :: Ty
---
--- HM : data Tm
--- HM :   | Tm  pos :: {SourcePos}  t :: Tm_
--- HM : 
--- HM : data Tm_
--- HM :   | Var  x :: {Var}
--- HM :   | Lam  x :: {Var}  t1 :: Tm
--- HM :   | App  t1 :: Tm  t2 :: Tm
--- HM :   | Let  x :: {Var}  t1 :: Tm  t2 :: Tm
 
 sem Tm_
     | Lam t1.typeEnvironment = (@x, freshVar @loc.num) : @lhs.typeEnvironment
@@ -52,40 +56,44 @@ sem Tm_
 -- SOME WORK HERE ?? 
 -- sem Tm
 --     | apply the generalise function!
-sem Tm
-    | Tm  lhs.annotated = undefined
+
+-- sem Tm
+--     | Tm  lhs.annotated = undefined
+
+sem Tm_
+    | Var lhs.annotated = SF.Var @x
+    | Lam lhs.annotated = SF.Lam @x (@t1.inferredType) @t1.annotated
+    | App lhs.annotated = SF.App @t1.annotated @t2.annotated
+    | Let lhs.annotated = undefined
 
 sem Tm_
     | Var lhs.substitution   = Identity
     | Lam lhs.substitution   = @t1.substitution
     | App lhs.substitution   = let theta1 = @t1.substitution
                                    theta2 = @t2.substitution
-                                   theta3 = unify (applySubst theta2 @t1.inferredType) (Arr (@t2.inferredType) (freshVar @loc.num))
+                                   theta3 = unify 
+                                        (applySubst theta2 @t1.inferredType) 
+                                        (Arr (@t2.inferredType) (freshVar @loc.num))
                                in Dot theta3 (Dot theta2 theta1)
     | Let lhs.substitution   = let theta1 = @t1.substitution
                                    theta2 = @t2.substitution
                                in  Dot theta2 theta1
 
 sem Tm_
-    | Var lhs.inferredType   = if elem @x (map fst @lhs.typeEnvironment) -- TODO: check this!
-                                then inst (getVar @x @lhs.typeEnvironment)
-                                else error ("Variable "++ @x ++" not found in environment.")
+    | Var lhs.inferredType   = let domain = map fst 
+                               in if elem @x (domain @lhs.typeEnvironment) -- TODO: check this!
+                                  then inst (getVar @x @lhs.typeEnvironment)
+                                  else error ("Variable "++ @x ++" not found in environment.")
     | Lam lhs.inferredType   = let theta1 = @t1.substitution
                                    alpha1 = freshVar @loc.num
                                    tau2   = @t1.inferredType
                                in  Arr (applySubst theta1 alpha1) tau2
     | App lhs.inferredType   = let alpha1 = freshVar @loc.num
                                    theta2 = @t2.substitution
-                                   theta3 = unify (applySubst theta2 @t1.inferredType) (Arr (@t2.inferredType) alpha1)
+                                   theta3 = unify (applySubst theta2 @t1.inferredType) 
+                                                  (Arr (@t2.inferredType) alpha1)
                                in  applySubst theta3 alpha1
     | Let lhs.inferredType   = @t2.inferredType
-
-
-
-
-
-
-
 
 {
 freshVar :: Int -> Ty

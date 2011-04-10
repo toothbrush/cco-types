@@ -1,7 +1,7 @@
 {-# LANGUAGE StandaloneDeriving,
              TypeSynonymInstances #-}
 module CCO.Types where
-    import CCO.SystemF.AG (Ty (..))
+    import CCO.SystemF.AG (Ty (..), Tm (..))
     import Data.List
 
     import Debug.Trace
@@ -16,6 +16,7 @@ module CCO.Types where
                  deriving Show
 
     deriving instance Show Ty
+    deriving instance Show Tm
 
     class Substitutable a where
         applySubst :: TySubst -> a -> a
