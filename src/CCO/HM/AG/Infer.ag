@@ -61,10 +61,29 @@ sem Tm_
 --     | Tm  lhs.annotated = undefined
 
 sem Tm_
-    | Var lhs.annotated = SF.Var @x
-    | Lam lhs.annotated = SF.Lam @x (@t1.inferredType) @t1.annotated
-    | App lhs.annotated = SF.App @t1.annotated @t2.annotated
-    | Let lhs.annotated = undefined
+    | Var lhs.annotated = if elem @x (domain @lhs.typeEnvironment)
+                            then SF.TyApp (SF.Var @x) (getVar @x @lhs.typeEnvironment)
+                            else SF.Var @x
+    | Lam lhs.annotated = if elem @x (domain @lhs.typeEnvironment) 
+                            then SF.TyApp (SF.Lam @x 
+                                            (getVar @x @lhs.typeEnvironment) 
+                                            (@t1.annotated)
+                                          )
+                                          (SF.Arr (getVar @x @lhs.typeEnvironment) (@t1.inferredType))
+                            else SF.TyLam 
+                            	        ('v' : show @loc.num) 
+                            	        (SF.Lam @x 
+                            	                (Forall ('v' : show @loc.num) @t1.inferredType) 
+                            	                (@t1.annotated)
+                            	        )
+                                
+    | App lhs.annotated = let f (SF.Arr t1 t2) = t2
+                          in
+                            case @t1.inferredType of
+                                Forall a ty1 -> SF.TyApp (SF.App @t1.annotated @t2.annotated) 
+                                                         (applySubst (Sub a (@t2.inferredType)) (f @t1.inferredType))
+                                otherwise    -> SF.TyApp (SF.App @t1.annotated @t2.annotated) (f @t1.inferredType)
+    | Let lhs.annotated = error "Let should have been rewritten..." undefined 
 
 sem Tm_
     | Var lhs.substitution   = Identity
@@ -80,8 +99,7 @@ sem Tm_
                                in  Dot theta2 theta1
 
 sem Tm_
-    | Var lhs.inferredType   = let domain = map fst 
-                               in if elem @x (domain @lhs.typeEnvironment) -- TODO: check this!
+    | Var lhs.inferredType   = if elem @x (domain @lhs.typeEnvironment) -- TODO: check this!
                                   then inst (getVar @x @lhs.typeEnvironment)
                                   else error ("Variable "++ @x ++" not found in environment.")
     | Lam lhs.inferredType   = let theta1 = @t1.substitution
@@ -123,4 +141,5 @@ getVar x env = case lookup x env of
                 _ -> error ("This shouldn't happen. " ++ x ++
                             " wasn't found in the environment.")
 
+domain = map fst
 }

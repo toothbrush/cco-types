@@ -16,7 +16,7 @@ module {CCO.HM.AG} {}
 {
 import CCO.Types
 import CCO.SystemF.AG (Ty (..))
-import qualified CCO.SystemF.AG as SF (Tm (..))
+import qualified CCO.SystemF.AG as SF (Tm (..), Ty (..))
 }
 
 include "AG/Base.ag"
