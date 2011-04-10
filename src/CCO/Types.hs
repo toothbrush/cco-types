@@ -18,13 +18,14 @@ module CCO.Types where
     deriving instance Show Ty
     deriving instance Show Tm
 
-    class Substitutable a where
+    class Types a where
         applySubst :: TySubst -> a -> a
-    
-    class HasTypeVariables a where
-        ftv :: a -> [Var]
+        ftv        :: a -> [Var]
 
-    instance Substitutable Ty where
+    instance Types Ty where
+        ftv (TyVar tv) = [tv]
+        ftv (Arr t1 t2) = nub(ftv t1 ++ ftv t2)
+        ftv (Forall tv ts) = nub (ftv ts) \\ [tv]
         applySubst Identity t = t
         applySubst (Dot s1 s2) t = applySubst s1 (applySubst s2 t)
         applySubst (Sub a t0) (TyVar t) = if a == t
@@ -37,9 +38,11 @@ module CCO.Types where
                                                     then trace "hmmmm" (Forall tv t0)
                                                     else Forall tv (applySubst s ts)
 
-    instance Substitutable TyEnv where
+    instance Types TyEnv where
         applySubst s [] = []
         applySubst s ((v,ts):r) = (v,applySubst s ts):applySubst s r
+        ftv [] = []
+        ftv ((v,ts):r) = ftv ts ++ ftv r
 
     unify :: Ty -> Ty -> TySubst
     unify t1@(TyVar tv1) t2@(TyVar tv2) | tv1 == tv2 = Identity
@@ -59,12 +62,3 @@ module CCO.Types where
                                                         (applySubst theta1 t12)
                                                         (applySubst theta1 t22)
                                         in Dot theta2 theta1
-        
-    instance HasTypeVariables Ty where
-        ftv (TyVar tv) = [tv]
-        ftv (Arr t1 t2) = nub(ftv t1 ++ ftv t2)
-        ftv (Forall tv ts) = nub (ftv ts) \\ [tv]
-
-    instance HasTypeVariables TyEnv where
-        ftv [] = []
-        ftv ((v,ts):r) = ftv ts ++ ftv r
