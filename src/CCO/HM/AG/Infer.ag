@@ -63,21 +63,13 @@ sem Tm_
 
 -- SOME WORK HERE ?? Here we should probably apply the rules 
 -- from figure 2 of the assignment to finally add the inferred types
--- as annotations. 
+-- as annotations, in Let. 
 sem Tm_
-    | Var lhs.annotated = if elem @x (domain @lhs.typeEnvironment)
-                            then SF.TyApp (SF.Var @x) (getVar @x @lhs.typeEnvironment)
-                            else trace ("why isn't "++ @x ++"in the environment?") (SF.Var @x)
-    | Lam lhs.annotated = if elem @x (domain @lhs.typeEnvironment) 
-                            then SF.TyApp (SF.Lam @x 
-                                            (getVar @x @lhs.typeEnvironment) 
-                                            (@t1.annotated)
-                                          )
-                                          (SF.Arr (getVar @x @lhs.typeEnvironment) (@t1.inferredType))
-                            else trace "hmmmmmm" (SF.TyLam 
+    | Var lhs.annotated = (SF.Var @x)
+    | Lam lhs.annotated = trace "hmmmmmm" (SF.TyLam 
                             	        ('v' : show @loc.num) 
                             	        (SF.Lam @x 
-                            	                (Forall ('v' : show @loc.num) @t1.inferredType) 
+                            	                (@t1.inferredType) 
                             	                (@t1.annotated)
                             	        )
                             	        )

@@ -40,9 +40,10 @@ doConversion t = let --noLet = withoutLet_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
-                 in trace (show (inferredType,substitution) 
-               --            ++ "\nwithout Let: " ++ (show $ noLet)
-                            ) 
+                 in 
+                    --trace (show (inferredType,substitution) 
+                    --        ++ "\nwithout Let: " ++ (show $ noLet)
+                    --        ) 
                             annotated
 
 -- | The top-level inherited attribute to be passed to an attribute grammar
