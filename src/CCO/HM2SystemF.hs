@@ -26,7 +26,6 @@ import CCO.HM.AG (
     substitution_Syn_Tm,
     Inh_Tm (..),
     annotated_Syn_Tm,
-    withoutLet_Syn_Tm 
     )
 import qualified CCO.SystemF.AG as SF (Tm (..))
 import CCO.Types
@@ -37,12 +36,12 @@ deriving instance Show Tm
 deriving instance Show Tm_
 
 doConversion :: Tm -> SF.Tm
-doConversion t = let noLet = withoutLet_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
-                     inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm noLet) inh_Tm)
-                     substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm noLet) inh_Tm)
-                     annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm noLet) inh_Tm)
+doConversion t = let --noLet = withoutLet_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+                     inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+                     substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+                     annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                  in trace (show (inferredType,substitution) 
-                           ++ "\nwithout Let: " ++ (show $ noLet)
+               --            ++ "\nwithout Let: " ++ (show $ noLet)
                             ) 
                             annotated
 

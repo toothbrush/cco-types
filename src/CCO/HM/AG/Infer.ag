@@ -33,13 +33,6 @@ attr Tm Tm_
     -- This attribute, on HM.Tm, returns a type-annotated SF.Tm term. 
     syn annotated :: {SF.Tm}
 
--- withoutLet rewrites an expression using the following identity:
--- let x = t1 in t2 == (\x . t2) t1
-attr Tm
-    syn withoutLet :: {Tm}
-attr Tm_
-    syn withoutLet :: {Tm_}
-
 sem Tm
     | Tm  loc.num :: uniqueref counter
 sem Tm_
@@ -47,16 +40,6 @@ sem Tm_
     | Lam loc.num :: uniqueref counter
     | App loc.num :: uniqueref counter
     | Let loc.num :: uniqueref counter 
-
--- all of the following functions are identity, except the case for 
--- a let-expression, which is rewritten into a let-free expression.
-sem Tm
-    | Tm  lhs.withoutLet = Tm @pos @t.withoutLet
-sem Tm_
-    | Var lhs.withoutLet = @self
-    | Lam lhs.withoutLet = Lam @x @t1.withoutLet
-    | App lhs.withoutLet = App @t1.withoutLet @t2.withoutLet
-    | Let lhs.withoutLet = App (Tm (SourcePos Stdin EOF) $ Lam @x @t2.withoutLet) @t1.withoutLet
 
 -- TODO remove before submission: useful for memory aid
 -- SF : data Ty
@@ -84,7 +67,7 @@ sem Tm_
 sem Tm_
     | Var lhs.annotated = if elem @x (domain @lhs.typeEnvironment)
                             then SF.TyApp (SF.Var @x) (getVar @x @lhs.typeEnvironment)
-                            else SF.Var @x
+                            else trace ("why isn't "++ @x ++"in the environment?") (SF.Var @x)
     | Lam lhs.annotated = if elem @x (domain @lhs.typeEnvironment) 
                             then SF.TyApp (SF.Lam @x 
                                             (getVar @x @lhs.typeEnvironment) 
