@@ -66,19 +66,14 @@ sem Tm_
 -- as annotations, in Let. 
 sem Tm_
     | Var lhs.annotated = (SF.Var @x)
-    | Lam lhs.annotated = trace "hmmmmmm" (SF.TyLam 
+    | Lam lhs.annotated = (SF.TyLam 
                             	        ('v' : show @loc.num) 
                             	        (SF.Lam @x 
                             	                (@t1.inferredType) 
                             	                (@t1.annotated)
                             	        )
                             	        )
-    | App lhs.annotated = let f (SF.Arr t1 t2) = t2
-                          in
-                            case @t1.inferredType of
-                                Forall a ty1 -> SF.TyApp (SF.App @t1.annotated @t2.annotated) 
-                                                         (applySubst (Sub a (@t2.inferredType)) (f @t1.inferredType))
-                                otherwise    -> SF.TyApp (SF.App @t1.annotated @t2.annotated) (f @t1.inferredType)
+    | App lhs.annotated = SF.App @t1.annotated @t2.annotated
     | Let lhs.annotated = error "Let should have been rewritten..." undefined 
 
 -- Calculates the substitution as defined in Algorithm W. 
