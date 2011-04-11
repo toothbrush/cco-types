@@ -74,11 +74,12 @@ sem Tm_
                                             (@t1.annotated)
                                           )
                                           (SF.Arr (getVar @x @lhs.typeEnvironment) (@t1.inferredType))
-                            else SF.TyLam 
+                            else trace "hmmmmmm" (SF.TyLam 
                             	        ('v' : show @loc.num) 
                             	        (SF.Lam @x 
                             	                (Forall ('v' : show @loc.num) @t1.inferredType) 
                             	                (@t1.annotated)
+                            	        )
                             	        )
     | App lhs.annotated = let f (SF.Arr t1 t2) = t2
                           in
