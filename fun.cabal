@@ -4,7 +4,7 @@ synopsis:              Utilities for a simple, implicitly typed functional
                        language.
 description:           Project distribution for Mini Project D of the course on
                        Compiler Constructionn (INFOMCCO) at Utrecht University.
-license:               AllRightsReserved
+license:               MIT
 license-file:          LICENSE
 category:              Compilers/Interpreters
 copyright:             (c) 2008 Utrecht University
@@ -14,11 +14,14 @@ stability:             provisional
 homepage:              http://www.cs.uu.nl/wiki/Cco/CourseSoftware
 tested-with:           GHC == 6.8.2, GHC == 6.8.3, GHC == 6.10.1
 build-type:            Simple
-cabal-version:         >= 1.2
+cabal-version:         >= 1.6
 extra-source-files:    AUTHORS, Makefile, src/CCO/HM/AG.ag,
                        src/CCO/HM/AG/Base.ag, src/CCO/SystemF/AG.ag,
+                       src/CCO/HM/AG/Infer.ag,
                        src/CCO/SystemF/AG/Base.ag,
-                       src/CCO/SystemF/AG/Printing.ag
+                       src/CCO/SystemF/AG/Printing.ag,
+                       latex-doc/main.tex,
+                       examples/*.hm
 
 executable parse-hm
   main-is:             ParseHM.hs
@@ -35,6 +38,6 @@ executable pp-systemf
 
 executable hm2systemf
   main-is:             HM2SystemF.hs
-  build-depends:       base, cco >= 0.0.4
-  other-modules:       CCO.HM, CCO.HM.AG, CCO.HM.Base
+  build-depends:       base, cco >= 0.0.4, uuagc
+  other-modules:       CCO.HM2SystemF, CCO.HM.AG, CCO.HM.Base, CCO.Types
   hs-source-dirs:      src

@@ -2,3 +2,7 @@ dist
 src/CCO/HM2SystemF/AG.hs
 src/CCO/HM/AG.hs
 src/CCO/SystemF/AG.hs
+latex-doc/main.aux
+latex-doc/main.log
+latex-doc/main.pdf
+latex-doc/main.toc
