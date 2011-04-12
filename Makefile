@@ -3,7 +3,6 @@ CABAL-BUILD-FLAGS     :=
 
 all : haskell
 
-<<<<<<< HEAD
 src/CCO/HM2SystemF/AG.hs : src/CCO/HM2SystemF/AG.ag src/CCO/HM2SystemF/AG/Base.ag
 	uuagc -Hcfws --self -P src/CCO/HM2SystemF src/CCO/HM2SystemF/AG.ag
 
