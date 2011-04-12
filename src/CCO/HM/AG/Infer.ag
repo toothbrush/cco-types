@@ -25,7 +25,7 @@ attr Tm Tm_
     syn substitution :: {TySubst}
     -- The type environment should start empty, then grow as more lambdas
     -- etc. are encountered.
-    inh typeEnvironment :: {TyEnv} -- DONE I think...
+    inh typeEnvironment :: {TyEnv}
     -- The counter is used to generate fresh variable names, which are unique.
     chn counter :: {Int}
 
@@ -49,13 +49,6 @@ sem Tm_
     | Let t2.typeEnvironment = let newEnv = applySubst @t1.substitution @lhs.typeEnvironment
                                    (ty', coercion) = gen newEnv @t1.inferredType
                                in  (@x, ty') : newEnv
-
--- SOME WORK HERE ?? Here we should probably apply the rules 
--- from figure 2 of the assignment to finally add the inferred types
--- as annotations, in Let. 
-
-
--- only in var and let rule. 
 
 sem Tm_
     | Var lhs.annotated = let (ty', coercion) = instantiate (getVar @x @lhs.typeEnvironment)
@@ -103,7 +96,7 @@ sem Tm_
 
 {
 -- | Turn a number (the counter's current value) into a type variable. 
--- NOTE: This assumes the user doesn't use variables like v? in the program. 
+-- NOTE: This assumes the user doesn't use variables like v[0-9]+ in the program. 
 --       This seems reasonable, given the scope of the assignment, a workaround
 --       shouldn't be difficult to implement.
 freshVar :: Int -> Ty
@@ -115,14 +108,16 @@ instantiate :: Ty -> (Ty, SF.Tm -> SF.Tm)
 -- first get all "forall" bound variables,
 -- then replace these with fresh variables
 instantiate t = let (forallVars, ty') = grabForallVars t
-                    nvars = map (TyVar . (++ "'")) forallVars -- counter here. 
+                    nvars = zipWith (\ a b -> TyVar (a ++ b)) forallVars (map (('_':).show) [0..])
                     s = foldr (\(o,n) -> Dot (Sub o n)) Identity (zip forallVars nvars)
                     coercion = \t -> foldl SF.TyApp t nvars
                 in  (applySubst s ty', coercion)
 
 grabForallVars :: Ty -> ([TyVar], Ty)
 grabForallVars t@(TyVar _)    = ([], t) 
-grabForallVars t@(Arr t1 t2)  = let (vars, ty) = grabForallVars t2 -- assuming rank 1, this never happens. 
+grabForallVars t@(Arr t1 t2)  = let (vars, ty) = grabForallVars t2 -- assuming rank 1, 
+                                                                   -- we needn't look at t1, since
+                                                                   -- forall can't occur there.
                                 in  (vars, Arr t1 ty)
 grabForallVars (Forall tv t1) = let (vars, ty) = grabForallVars t1
                                 in  (tv:vars, ty)
