@@ -33,11 +33,13 @@ module CCO.Types where
                  | Dot TySubst TySubst -- ^ Chain substitutions together.
                  deriving Show
 
+    -- | Useful for printing the type of the entire equation.
     instance Show Ty where 
         show (TyVar x) = x
         show (Arr t1 t2) = "(" ++ show t1 ++ " -> " ++ show t2 ++ ")"
         show (Forall tv ty) = "(forall " ++ tv ++ ". " ++ show ty ++ ")"
 
+    -- This was nice for debugging.
     deriving instance Show Tm
 
     -- | A class which is useful for defining functions such as 'applySubst' (which
@@ -68,6 +70,8 @@ module CCO.Types where
                                                     else Forall tv (applySubst s ts)
 
     instance Types TyEnv where
+        -- Simply extend the functions to support lists
+        -- of whatever they already support.
         applySubst _ []         = []
         applySubst s ((v,ts):r) = (v, applySubst s ts):applySubst s r
         ftv []         = []

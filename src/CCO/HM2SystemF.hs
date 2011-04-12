@@ -33,23 +33,20 @@ import CCO.Types
 
 import Debug.Trace
 
-deriving instance Show Tm
-deriving instance Show Tm_
-
 doConversion :: Tm -> SF.Tm
 doConversion t = let inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inherit)
-                     substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inherit)
                      annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inherit)
+                     -- we must generalise one more time, to figure out which
+                     -- TyLam's must be prepended. 
                      (ty', coercion) = gen [] inferredType
-                 in 
-                    --trace (show (inferredType,substitution))
-                            trace (show ty') (coercion annotated)
+                 in  trace ("Type of entire expression: \n  :: "++show ty'++"\n") 
+                     (coercion annotated)
 
 -- | The top-level inherited attribute to be passed to an attribute grammar
 -- for System F. In our case, we want to start with an empty type
 -- environment, and a variable counter of 0 (used for generating fresh
 -- type variables).
 inherit :: Inh_Tm
-inherit = Inh_Tm { typeEnvironment_Inh_Tm = []
-                 , counter_Inh_Tm = 0
+inherit = Inh_Tm { typeEnvironment_Inh_Tm = [] -- Start with empty environment.
+                 , counter_Inh_Tm = 0          -- Start variable-name-seed at 0.
                  }
