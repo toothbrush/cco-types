@@ -21,6 +21,7 @@ extra-source-files:    AUTHORS, Makefile, src/CCO/HM/AG.ag,
                        src/CCO/SystemF/AG/Base.ag,
                        src/CCO/SystemF/AG/Printing.ag,
                        latex-doc/main.tex,
+                       latex-doc/main.pdf,
                        examples/*.hm,
                        test.sh
 
