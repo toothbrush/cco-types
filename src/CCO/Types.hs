@@ -48,11 +48,15 @@ module CCO.Types where
         ftv        :: a -> [Var]
 
     instance Types Ty where
-        ftv (TyVar tv) = [tv]
-        ftv (Arr t1 t2) = nub (ftv t1 ++ ftv t2)
-        ftv (Forall tv ts) = nub (ftv ts) \\ [tv]
-        applySubst Identity t = t --identity
-        applySubst (Dot s1 s2) t = applySubst s1 (applySubst s2 t)
+        -- The free type variables are accumulated in the same way
+        -- as recommended in the course slides.
+        ftv (TyVar tv)                  = [tv]
+        ftv (Arr t1 t2)                 = nub (ftv t1 ++ ftv t2)
+        ftv (Forall tv ts)              = ftv ts \\ [tv]
+        -- The implementation of applySubst is exactly like presented in the
+        -- slides of this course. 
+        applySubst Identity t           = t --identity
+        applySubst (Dot s1 s2) t        = applySubst s1 (applySubst s2 t)
         applySubst (Sub a t0) (TyVar t) = if a == t
                                                then t0
                                                else TyVar t --identity
@@ -64,30 +68,32 @@ module CCO.Types where
                                                     else Forall tv (applySubst s ts)
 
     instance Types TyEnv where
-        applySubst s [] = []
-        applySubst s ((v,ts):r) = (v,applySubst s ts):applySubst s r
-        ftv [] = []
+        applySubst _ []         = []
+        applySubst s ((v,ts):r) = (v, applySubst s ts):applySubst s r
+        ftv []         = []
         ftv ((v,ts):r) = nub $ ftv ts ++ ftv r
 
     -- | The unification algorithm. If none of the cases match, fail.
     unify :: Ty -> Ty -> TySubst
     unify t1@(TyVar tv1) t2@(TyVar tv2) | tv1 == tv2 = Identity
-                                        | tv1 `notElem`  ftv t2 = Sub tv1 t2
-                                        | tv2 `notElem`  ftv t1 = Sub tv2 t1
+                                        | tv1 `notElem` ftv t2 = Sub tv1 t2
+                                        | tv2 `notElem` ftv t1 = Sub tv2 t1
                                         | otherwise = error "Cannot unify. Error."
     unify (TyVar tv1) t | tv1 `notElem` ftv t = Sub tv1 t
                         | otherwise = error $ "Occurs check: " ++
-                                                          show tv1 ++ ", " ++
-                                                          show t
-                                                          ++ "\nCannot create infinite type."
+                                                show tv1 ++ " = " ++
+                                                show t
+                                                ++ "\nCannot create infinite type."
     unify t (TyVar tv2) | tv2 `notElem` ftv t = Sub tv2 t
                         | otherwise = error $ "Occurs check: " ++ 
-                                                          show tv2 ++ ", " ++
-                                                          show t
-                                                          ++ "\nCannot create infinite type."
+                                                show tv2 ++ " = " ++
+                                                show t
+                                                ++ "\nCannot create infinite type."
     unify (Arr t11 t12) (Arr t21 t22) = let theta1 = unify t11 t21
                                             theta2 = unify
                                                         (applySubst theta1 t12)
                                                         (applySubst theta1 t22)
                                         in Dot theta2 theta1
-    unify t1 t2 = error$"Unification failure. \nt_1 = " ++ show t1 ++ "\nt_2 = " ++ show t2
+    unify t1 t2 = error $ "Unification failure. \nt_1 = " ++ 
+                          show t1 ++ "\nt_2 = " ++ 
+                          show t2
