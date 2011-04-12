@@ -83,7 +83,7 @@ sem Tm_
     | Var lhs.inferredType   = if @x `elem` domain @lhs.typeEnvironment
                                   then let (ty', coercion) = instantiate (getVar @x @lhs.typeEnvironment)
                                        in   ty' -- the coercion is used elsewhere. 
-                                  else error ("Variable "++ @x ++" not found in environment.")
+                                  else error ("Variable "++ @x ++" not found in environment (out of scope).")
     | Lam lhs.inferredType   = let theta1 = @t1.substitution
                                    alpha1 = freshVar @loc.num
                                    tau2   = @t1.inferredType
