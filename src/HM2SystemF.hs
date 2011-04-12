@@ -16,6 +16,9 @@ import qualified CCO.SystemF.Base as SF (Tm (Var))
 import CCO.Tree (ATerm, toTree, parser, fromTree)
 import Control.Arrow (arr, (>>>))
 
+-- | The entry point for the hm2systemf program. Built up 
+-- as a pipeline of functions. 
+main :: IO ()
 main = ioWrap $
         parser >>>
         (component toTree :: Component ATerm Tm) >>>
@@ -27,5 +30,5 @@ main = ioWrap $
 -- AG code on the parsed Hindley-Milner term. Returns 
 -- a type-annotated System F term.
 convertAndType :: Component Tm SF.Tm
-convertAndType = component $ (\s -> do return (doConversion s))
+convertAndType = component (return . doConversion)
 
