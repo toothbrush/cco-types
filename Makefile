@@ -11,6 +11,7 @@ src/CCO/SystemF/AG.hs : src/CCO/SystemF/AG.ag src/CCO/SystemF/AG/Base.ag \
 	uuagc -Hdcfws --self -P src/CCO/SystemF src/CCO/SystemF/AG.ag
 
 haskell : src/CCO/HM/AG.hs src/CCO/SystemF/AG.hs
+	chmod a+x test.sh
 	runhaskell Setup.lhs configure $(CABAL-CONFIGURE-FLAGS)
 	runhaskell Setup.lhs build $(CABAL-BUILD-FLAGS)
 
