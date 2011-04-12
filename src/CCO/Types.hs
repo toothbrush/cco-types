@@ -20,7 +20,9 @@ module CCO.Types where
 
     import Debug.Trace
     
+    -- | A Type environment maps variable names to types.
     type TyEnv = [(Var,Ty)]
+    -- | TyVar and Var are just strings (variable names).
     type TyVar = String
     type Var   = String
     
@@ -47,7 +49,7 @@ module CCO.Types where
 
     instance Types Ty where
         ftv (TyVar tv) = [tv]
-        ftv (Arr t1 t2) = nub(ftv t1 ++ ftv t2)
+        ftv (Arr t1 t2) = nub (ftv t1 ++ ftv t2)
         ftv (Forall tv ts) = nub (ftv ts) \\ [tv]
         applySubst Identity t = t --identity
         applySubst (Dot s1 s2) t = applySubst s1 (applySubst s2 t)
@@ -65,7 +67,7 @@ module CCO.Types where
         applySubst s [] = []
         applySubst s ((v,ts):r) = (v,applySubst s ts):applySubst s r
         ftv [] = []
-        ftv ((v,ts):r) = ftv ts ++ ftv r
+        ftv ((v,ts):r) = nub $ ftv ts ++ ftv r
 
     -- | The unification algorithm. If none of the cases match, fail.
     unify :: Ty -> Ty -> TySubst
