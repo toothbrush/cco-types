@@ -72,15 +72,15 @@ module CCO.Types where
     -- | The unification algorithm. If none of the cases match, fail.
     unify :: Ty -> Ty -> TySubst
     unify t1@(TyVar tv1) t2@(TyVar tv2) | tv1 == tv2 = Identity
-                                        | not (elem tv1 (ftv t2)) = Sub tv1 t2
-                                        | not (elem tv2 (ftv t1)) = Sub tv2 t1
+                                        | tv1 `notElem`  ftv t2 = Sub tv1 t2
+                                        | tv2 `notElem`  ftv t1 = Sub tv2 t1
                                         | otherwise = error "Cannot unify. Error."
-    unify (TyVar tv1) t | not (elem tv1 (ftv t)) = Sub tv1 t
+    unify (TyVar tv1) t | tv1 `notElem` ftv t = Sub tv1 t
                         | otherwise = error $ "Occurs check: " ++
                                                           show tv1 ++ ", " ++
                                                           show t
                                                           ++ "\nCannot create infinite type."
-    unify t (TyVar tv2) | not (elem tv2 (ftv t)) = Sub tv2 t
+    unify t (TyVar tv2) | tv2 `notElem` ftv t = Sub tv2 t
                         | otherwise = error $ "Occurs check: " ++ 
                                                           show tv2 ++ ", " ++
                                                           show t

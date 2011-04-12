@@ -41,18 +41,6 @@ sem Tm_
     | App loc.num :: uniqueref counter
     | Let loc.num :: uniqueref counter 
 
--- TODO remove before submission: useful for memory aid
--- SF : data Ty
--- SF :   | TyVar   a :: {TyVar}
--- SF :   | Arr     ty1 :: Ty  ty2 :: Ty
--- SF :   | Forall  a :: {TyVar}  ty1 :: Ty
--- SF : data Tm
--- SF :      | Var    x :: {Var}
--- SF :      | Lam    x :: {Var}  ty :: Ty  t1 :: Tm
--- SF :      | App    t1 :: Tm  t2 :: Tm
--- SF :      | TyLam  a :: {TyVar}  t1 :: Tm
--- SF :      | TyApp  t1 :: Tm  ty :: Ty
-
 -- The type environment is modified as specified in Algorithm W. Let's and lambda's 
 -- introduce new variables to the environment.
 sem Tm_
@@ -77,12 +65,10 @@ sem Tm_
                                 (applySubst @t1.substitution (freshVar @loc.num))
                                 (@t1.annotated)
     | App lhs.annotated = SF.App @t1.annotated @t2.annotated
-    | Let lhs.annotated = let tyX = {-trace ("\n t1.inferredType = "++show @t1.inferredType++"\nt2.inferredType = "++show @t2.inferredType) $-} applySubst @t1.substitution @t1.inferredType
+    | Let lhs.annotated = let tyX = applySubst @t1.substitution @t1.inferredType
                               (ty', coercion) =  gen @lhs.typeEnvironment @t1.inferredType
-                              tyXgen = trace (show @lhs.typeEnvironment) ty'
-                              tm = SF.App (SF.Lam @x tyXgen @t2.annotated) (coercion @t1.annotated) 
                               ty = applySubst (Dot @t1.substitution @t2.substitution) (freshVar @loc.num)
-                          in  tm
+                          in  SF.App (SF.Lam @x ty' @t2.annotated) (coercion @t1.annotated) 
 
 -- Calculates the substitution as defined in Algorithm W. 
 sem Tm_
@@ -100,9 +86,9 @@ sem Tm_
 
 -- Does the type inference using helper functions defined here and in CCO.Types. 
 sem Tm_
-    | Var lhs.inferredType   = if elem @x (domain @lhs.typeEnvironment) -- TODO: check this!
+    | Var lhs.inferredType   = if @x `elem` domain @lhs.typeEnvironment
                                   then let (ty', coercion) = instantiate (getVar @x @lhs.typeEnvironment)
-                                       in  ty'
+                                       in   ty'
                                   else error ("Variable "++ @x ++" not found in environment.")
     | Lam lhs.inferredType   = let theta1 = @t1.substitution
                                    alpha1 = freshVar @loc.num
@@ -121,7 +107,7 @@ sem Tm_
 --       This seems reasonable, given the scope of the assignment, a workaround
 --       shouldn't be difficult to implement.
 freshVar :: Int -> Ty
-freshVar i = TyVar $ 'v' : (show i)
+freshVar i = TyVar $ 'v' : show i
 
 -- | Instantiate. Specialise a given polymorphic type
 -- with a fresh variable. 
@@ -155,8 +141,7 @@ gen env tau = let free = ftv tau \\ ftv env
 -- forall a,b,c.T.
 -- Which is again a type. 
 wrapForall :: [Var] -> Ty -> Ty
-wrapForall [] t = t
-wrapForall (v:vs) t = Forall v (wrapForall vs t)
+wrapForall vs t = foldr Forall t vs
 
 -- | This gives us unique variable numbers, incrementing the seed each time.
 -- Automatically invoked by AG system when the keyword 'uniqueref' is used next 

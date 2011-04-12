@@ -60,7 +60,7 @@ instance Tree Tm where
 -------------------------------------------------------------------------------
 
 instance Printable Tm where
-  pp t = ppML_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+  pp t = ppML_Syn_Tm (wrap_Tm (sem_Tm t) inhTm)
 
 -------------------------------------------------------------------------------
 -- Top-level inherited attributes
@@ -68,5 +68,5 @@ instance Printable Tm where
 
 -- | The top-level inherited attributes to be passed to an attribute grammar
 -- for System F.
-inh_Tm :: Inh_Tm
-inh_Tm = Inh_Tm {prec_Inh_Tm = 0}
+inhTm :: Inh_Tm
+inhTm = Inh_Tm {prec_Inh_Tm = 0}

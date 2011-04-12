@@ -37,21 +37,19 @@ deriving instance Show Tm
 deriving instance Show Tm_
 
 doConversion :: Tm -> SF.Tm
-doConversion t = let inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
-                     substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
-                     annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+doConversion t = let inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inherit)
+                     substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inherit)
+                     annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inherit)
                      (ty', coercion) = gen [] inferredType
                  in 
-                    --trace (show (inferredType,substitution) 
-                    --        ++ "\nwithout Let: " ++ (show $ noLet)
-                    --        ) 
+                    --trace (show (inferredType,substitution))
                             trace (show ty') (coercion annotated)
 
 -- | The top-level inherited attribute to be passed to an attribute grammar
 -- for System F. In our case, we want to start with an empty type
 -- environment, and a variable counter of 0 (used for generating fresh
 -- type variables).
-inh_Tm :: Inh_Tm
-inh_Tm = Inh_Tm { typeEnvironment_Inh_Tm = []
-                , counter_Inh_Tm = 0
-                }
+inherit :: Inh_Tm
+inherit = Inh_Tm { typeEnvironment_Inh_Tm = []
+                 , counter_Inh_Tm = 0
+                 }
