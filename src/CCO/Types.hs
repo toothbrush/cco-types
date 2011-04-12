@@ -35,6 +35,7 @@ module CCO.Types where
         show (TyVar x) = x
         show (Arr t1 t2) = "(" ++ show t1 ++ " -> " ++ show t2 ++ ")"
         show (Forall tv ty) = "(forall " ++ tv ++ ". " ++ show ty ++ ")"
+
     deriving instance Show Tm
 
     -- | A class which is useful for defining functions such as 'applySubst' (which
