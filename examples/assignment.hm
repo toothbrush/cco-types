@@ -2,5 +2,5 @@
     \x.
         let id = \y.y 
         in 
-            (id f) (id x) 
+            f (id x) (id x) 
         ni
