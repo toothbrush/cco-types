@@ -92,7 +92,7 @@ ppInfixSL ctx (op, prec) l r = modifier $ l >#< ppOp >#< r
 ppInfixML :: Prec -> (String, Prec) -> Doc -> Doc -> Doc
 ppInfixML ctx (op, prec) l r = modifier $ l >#< ppOp >-< r
   where
-    modifier doc = if prec < ctx then (lparen >#< doc >-< rparen) else doc
+    modifier doc = lparen >#< doc >-< rparen
     ppOp         = text op
 }
 
