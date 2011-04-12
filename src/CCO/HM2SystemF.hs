@@ -26,6 +26,7 @@ import CCO.HM.AG (
     substitution_Syn_Tm,
     Inh_Tm (..),
     annotated_Syn_Tm,
+    gen
     )
 import qualified CCO.SystemF.AG as SF (Tm (..))
 import CCO.Types
@@ -40,11 +41,12 @@ doConversion t = let --noLet = withoutLet_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+                     (ty', coercion) = gen [] inferredType
                  in 
                     --trace (show (inferredType,substitution) 
                     --        ++ "\nwithout Let: " ++ (show $ noLet)
                     --        ) 
-                            annotated
+                            trace (show ty') (coercion annotated)
 
 -- | The top-level inherited attribute to be passed to an attribute grammar
 -- for System F. In our case, we want to start with an empty type
