@@ -37,8 +37,7 @@ deriving instance Show Tm
 deriving instance Show Tm_
 
 doConversion :: Tm -> SF.Tm
-doConversion t = let --noLet = withoutLet_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
-                     inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
+doConversion t = let inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      substitution = substitution_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inh_Tm)
                      (ty', coercion) = gen [] inferredType
