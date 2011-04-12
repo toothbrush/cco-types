@@ -52,9 +52,10 @@ sem Tm_
 
 sem Tm_
     | Var lhs.annotated = let (ty', coercion) = instantiate (getVar @x @lhs.typeEnvironment)
+                              -- note that since we don't label variables in-place,
+                              -- the ty' is unused. 
                           in  coercion (SF.Var @x)
-    | Lam lhs.annotated = 
-                        SF.Lam @x 
+    | Lam lhs.annotated = SF.Lam @x 
                                 (applySubst @t1.substitution (freshVar @loc.num))
                                 (@t1.annotated)
     | App lhs.annotated = SF.App @t1.annotated @t2.annotated

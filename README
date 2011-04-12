@@ -2,7 +2,7 @@ README file for the 4th assignment of Compiler Construction
 
 Type inference
 
-13 April, 2011
+13th April, 2011
 
 Author: Paul van der Walt (3120805)
 
@@ -10,10 +10,13 @@ Author: Paul van der Walt (3120805)
 
 FOR THE RUSHED
 
+$ cd `mktemp -d`
 $ tar xvvzf types.tgz
 $ cd fun-0.0.4/
 $ make
-$ cat examples/exampleX.hm | parse-hm | hm2systemf | pp-systemf
+$ cat examples/assignment.hm | parse-hm | hm2systemf | pp-systemf
+
+IMPORTANT: latex-doc/main.pdf
 
 ------------------------------------------------------------------------------------------
 
@@ -40,6 +43,9 @@ the following:
 $ cat examples/exampleX.hm | parse-hm | hm2systemf | pp-systemf
 
 or if you'd rather not install, prefix all executables with dist/build/<exec-name>/. 
+Or equivalently, use the included alias:
+
+$ ./test.sh examples/exampleX.hm
 
 -------------------------------------------------------------------------------------------
 
@@ -54,9 +60,15 @@ FOR THE PATIENT (or the more curious)
 
 Features
 
+* Infers types for all valid Hindley-Milner programs, as defined in 
+  the assignment,
+* Fails with a reasonable type-error if something is wrong.
 
 In a future version, possibilities for improvement include:
 
+* Could be a little smarter; for example, the generalise/substitution
+  could happen at the end to save redundant abstractions.
+* Even better errors. 
 
 Requirements:
 
