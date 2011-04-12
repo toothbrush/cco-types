@@ -82,4 +82,4 @@ module CCO.Types where
                                                         (applySubst theta1 t12)
                                                         (applySubst theta1 t22)
                                         in Dot theta2 theta1
-    unify _ _ = error "Unification failure."
+    unify t1 t2 = error$"Unification failure. \nt_1 = " ++ show t1 ++ "\nt_2 = " ++ show t2

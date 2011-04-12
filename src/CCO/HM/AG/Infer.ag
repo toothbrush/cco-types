@@ -93,7 +93,7 @@ sem Tm_
 -- Does the type inference using helper functions defined here and in CCO.Types. 
 sem Tm_
     | Var lhs.inferredType   = if elem @x (domain @lhs.typeEnvironment) -- TODO: check this!
-                                  then inst (getVar @x @lhs.typeEnvironment)
+                                  then instantiate (getVar @x @lhs.typeEnvironment)
                                   else error ("Variable "++ @x ++" not found in environment.")
     | Lam lhs.inferredType   = let theta1 = @t1.substitution
                                    alpha1 = freshVar @loc.num
@@ -116,11 +116,18 @@ freshVar i = TyVar $ 'v' : (show i)
 
 -- | Instantiate. Specialise a given polymorphic type
 -- with a fresh variable. 
-inst :: Ty -> Ty
-inst t@(TyVar _)    = t
-inst t@(Arr t1 t2)  = trace "inst Arr (guessing!)" t
-inst (Forall tv t1) = applySubst (Sub tv (TyVar fresh)) (inst t1)
-                        where fresh = (tv ++ "'")
+instantiate :: Ty -> Ty
+-- first get all "forall" bound variables,
+-- then replace these with fresh variables
+instantiate t = let forallVars = grabForallVars t
+                    nvars = map (TyVar . (++ "'")) forallVars
+                    s = foldr (\(o,n) -> Dot (Sub o n)) Identity (zip forallVars nvars)
+                in  applySubst s t
+
+grabForallVars :: Ty -> [TyVar]
+grabForallVars (TyVar t) = []
+grabForallVars (Arr t1 t2) = grabForallVars t1 ++ grabForallVars t2
+grabForallVars (Forall tv t1) = tv : grabForallVars t1
 
 -- | Generalise function. Finds all unbound type variables in
 -- a type T, and then makes the type into 
