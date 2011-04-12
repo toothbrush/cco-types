@@ -26,7 +26,7 @@ import CCO.HM.AG (
     substitution_Syn_Tm,
     Inh_Tm (..),
     annotated_Syn_Tm,
-    gen
+    generalise
     )
 import qualified CCO.SystemF.AG as SF (Tm (..))
 import CCO.Types
@@ -38,7 +38,7 @@ doConversion t = let inferredType = inferredType_Syn_Tm (wrap_Tm (sem_Tm t) inhe
                      annotated    = annotated_Syn_Tm (wrap_Tm (sem_Tm t) inherit)
                      -- we must generalise one more time, to figure out which
                      -- TyLam's must be prepended. 
-                     (ty', coercion) = gen [] inferredType
+                     (ty', coercion) = generalise [] inferredType
                  in  trace ("Type of entire expression: \n  :: "++show ty'++"\n") 
                      (coercion annotated)
 

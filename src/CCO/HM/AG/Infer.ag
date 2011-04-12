@@ -47,7 +47,7 @@ sem Tm_
     | Lam t1.typeEnvironment = (@x, freshVar @loc.num) : @lhs.typeEnvironment
     | App t2.typeEnvironment = applySubst @t1.substitution @lhs.typeEnvironment
     | Let t2.typeEnvironment = let newEnv = applySubst @t1.substitution @lhs.typeEnvironment
-                                   (ty', coercion) = gen newEnv @t1.inferredType
+                                   (ty', coercion) = generalise newEnv @t1.inferredType
                                in  (@x, ty') : newEnv
 
 sem Tm_
@@ -60,7 +60,7 @@ sem Tm_
                                 (@t1.annotated)
     | App lhs.annotated = SF.App @t1.annotated @t2.annotated
     | Let lhs.annotated = let tyX = applySubst @t1.substitution @t1.inferredType
-                              (ty', coercion) =  gen @lhs.typeEnvironment @t1.inferredType
+                              (ty', coercion) =  generalise @lhs.typeEnvironment @t1.inferredType
                               ty = applySubst (Dot @t1.substitution @t2.substitution) (freshVar @loc.num)
                           in  SF.App (SF.Lam @x ty' @t2.annotated) (coercion @t1.annotated) 
 
@@ -133,10 +133,10 @@ grabForallVars (Forall tv t1) = let (vars, ty) = grabForallVars t1
 -- "foreach [those variables] T."
 -- Also returns a coercion. This is to be applied to the term, 
 -- resulting in an SF.Tm with type lambdas at the right spots.
-gen :: TyEnv -> Ty -> (Ty, SF.Tm -> SF.Tm)
-gen env tau = let free = ftv tau \\ ftv env
-                  coercion = \t -> foldr SF.TyLam t free 
-              in  (wrapForall free tau, coercion)
+generalise :: TyEnv -> Ty -> (Ty, SF.Tm -> SF.Tm)
+generalise env tau = let free = ftv tau \\ ftv env
+                         coercion = \t -> foldr SF.TyLam t free 
+                     in  (wrapForall free tau, coercion)
 
 -- | Take a list of variables, and wrap them in a Forall 
 -- clause. That is, imagine the list of variables [a,b,c] is
