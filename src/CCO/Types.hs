@@ -49,16 +49,16 @@ module CCO.Types where
         ftv (TyVar tv) = [tv]
         ftv (Arr t1 t2) = nub(ftv t1 ++ ftv t2)
         ftv (Forall tv ts) = nub (ftv ts) \\ [tv]
-        applySubst Identity t = t
+        applySubst Identity t = t --identity
         applySubst (Dot s1 s2) t = applySubst s1 (applySubst s2 t)
         applySubst (Sub a t0) (TyVar t) = if a == t
                                                then t0
-                                               else TyVar t
+                                               else TyVar t --identity
         applySubst s@(Sub a t0) (Arr t1 t2) = Arr
                                                   (applySubst s t1)
                                                   (applySubst s t2)
         applySubst s@(Sub a t0) (Forall tv ts) = if a == tv
-                                                    then trace "hmmmm" (Forall tv t0)
+                                                    then Forall tv ts --identity
                                                     else Forall tv (applySubst s ts)
 
     instance Types TyEnv where
