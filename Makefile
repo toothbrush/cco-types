@@ -21,6 +21,10 @@ documentation: latex-doc/main.tex
 clean : 
 	-rm src/CCO/HM/AG.hs
 	-rm src/CCO/SystemF/AG.hs
+	-rm latex-doc/main.pdf
+	-rm latex-doc/main.aux
+	-rm latex-doc/main.log
+	-rm latex-doc/main.toc
 	cabal clean
 
 .PHONY : haskell clean
