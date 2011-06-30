@@ -51,7 +51,7 @@ sem Tm_
                                in  (@x, ty') : newEnv
 
 sem Tm_
-    | Var lhs.annotated = let (ty', coercion) = instantiate (getVar @x @lhs.typeEnvironment)
+    | Var lhs.annotated = let (ty', coercion) = instantiate @loc.num (getVar @x @lhs.typeEnvironment)
                               -- note that since we don't label variables in-place,
                               -- the ty' is unused. 
                           in  coercion (SF.Var @x)
@@ -81,7 +81,7 @@ sem Tm_
 -- Does the type inference using helper functions defined here and in CCO.Types. 
 sem Tm_
     | Var lhs.inferredType   = if @x `elem` domain @lhs.typeEnvironment
-                                  then let (ty', coercion) = instantiate (getVar @x @lhs.typeEnvironment)
+                                  then let (ty', coercion) = instantiate @loc.num (getVar @x @lhs.typeEnvironment)
                                        in   ty' -- the coercion is used elsewhere. 
                                   else error ("Variable "++ @x ++" not found in environment (out of scope).")
     | Lam lhs.inferredType   = let theta1 = @t1.substitution
@@ -107,14 +107,14 @@ freshVar i = TyVar $ 'v' : show i
 -- with fresh variables. A coercion function is also returned, 
 -- which should be used to show where in the original term
 -- type instantiations were applied. 
-instantiate :: Ty -> (Ty, SF.Tm -> SF.Tm)
-instantiate t = let (forallVars, ty') = grabForallVars t
-                    -- first get all "forall" bound variables,
-                    -- then replace these with fresh variables
-                    nvars = zipWith (\ a b -> TyVar (a ++ b)) forallVars (map (('_':).show) [0..])
-                    s = foldr (\(o,n) -> Dot (Sub o n)) Identity (zip forallVars nvars)
-                    coercion = \t -> foldl SF.TyApp t nvars
-                in  (applySubst s ty', coercion)
+instantiate :: Int -> Ty -> (Ty, SF.Tm -> SF.Tm)
+instantiate seed t = let (forallVars, ty') = grabForallVars t
+                         -- first get all "forall" bound variables,
+                         -- then replace these with fresh variables
+                         nvars = zipWith (\ a b -> TyVar (a ++ b)) forallVars (map (('_':).show) [seed..])
+                         s = foldr (\(o,n) -> Dot (Sub o n)) Identity (zip forallVars nvars)
+                         coercion = \t -> foldl SF.TyApp t nvars
+                     in  (applySubst s ty', coercion)
 
 -- | Unrolls a type, and returns all the variables
 -- which are in "forall". This is useful for instantiation, 
